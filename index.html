@@ -1,0 +1,1501 @@
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Distributor Incentive Hub — Underlinen</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#F0F7FF;--surface:#fff;--border:#C2DEFF;
+  --text:#05112A;--sub:#3A5578;--dim:#7A9BBF;
+  --red:#0057FF;--red-s:#EBF2FF;--red-m:#AACBFF;
+  --blue:#0057FF;--blue-s:#EBF2FF;--blue-m:#AACBFF;
+  --green:#00C48C;--green-s:#E5FBF4;--green-m:#80E8CB;
+  --amber:#00B4D8;--amber-s:#E0F7FD;--amber-m:#80DDEF;
+  --purple:#7B2FFF;--purple-s:#F0E8FF;
+  --gold:#00C48C;--gold-s:#E5FBF4;
+  --r:16px;--rs:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;font-size:15px;min-height:100vh;padding-bottom:70px}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,#0057FF 0%,#0096FF 50%,#00C48C 100%);position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,87,255,.28)}
+.hdr-inner{display:flex;align-items:center;gap:12px;padding:11px 14px}
+.logo-wrap{width:48px;height:48px;background:#fff;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.logo-fc{display:none}
+.logo-text{display:none}
+.hdr-copy{flex:1}
+.hdr-brand{font-size:10px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:1px}
+.hdr-title{font-size:18px;font-weight:900;color:#fff;line-height:1.1}
+.hdr-sub{font-size:10px;color:rgba(255,255,255,.65);margin-top:2px;font-weight:600}
+.hdr-btns{display:flex;gap:6px;flex-shrink:0}
+.hdr-btn{font-size:10px;font-weight:800;padding:6px 10px;border-radius:20px;background:rgba(255,255,255,.2);color:#fff;cursor:pointer;border:none;font-family:inherit}
+
+/* BARS */
+.adminbar{background:#05112A;padding:8px 14px;display:none;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:70px;z-index:99}
+.adminbar.show{display:flex}
+.abar-lbl{font-size:10px;font-weight:800;color:rgba(255,255,255,.45);letter-spacing:1px;text-transform:uppercase}
+.abar-info{font-size:12px;font-weight:700;color:#fff;flex:1}
+.abtn{font-size:11px;font-weight:800;padding:5px 11px;border-radius:8px;border:none;cursor:pointer;font-family:inherit}
+.abtn-red{background:#FF4060;color:#fff}.abtn-ghost{background:rgba(255,255,255,.12);color:#fff}
+.upbar{background:#fff;border-bottom:2px solid var(--border);padding:8px 14px;display:none;align-items:center;gap:8px;flex-wrap:wrap;position:sticky;top:70px;z-index:98}
+.upbar.show{display:flex}
+.up-btn{background:var(--green);color:#fff;font-weight:800;font-size:12px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;font-family:inherit}
+.up-st{font-size:12px;font-weight:700;color:var(--sub);flex:1}
+.up-st.ok{color:var(--green)}.up-st.err{color:var(--red)}
+
+/* TABS */
+.tabs{background:#fff;border-bottom:2px solid var(--border);display:flex;overflow-x:auto;scrollbar-width:none;position:sticky;top:70px;z-index:97;transition:top .2s}
+.tabs.t1{top:118px}.tabs.t2{top:140px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;padding:10px 14px;font-size:12px;font-weight:800;color:var(--dim);background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;margin-bottom:-2px;font-family:inherit}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+/* SECTIONS */
+.sec{display:none;padding:12px}.sec.active{display:block}
+
+/* CARDS */
+.card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:15px;margin-bottom:12px}
+.ctitle{font-size:13px;font-weight:900;color:var(--text);margin-bottom:13px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.pill{font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;padding:3px 8px;border-radius:20px}
+.pr{background:var(--red-s);color:var(--red)}.pb{background:var(--blue-s);color:var(--blue)}
+.pg{background:var(--green-s);color:var(--green)}.pa{background:var(--amber-s);color:var(--amber)}
+.pp{background:var(--purple-s);color:var(--purple)}
+
+/* DISTRIBUTOR SELECTOR */
+.rsel-wrap{background:linear-gradient(135deg,#EBF2FF,#E5FBF4);border:1.5px solid var(--blue-m);border-radius:var(--r);padding:13px 15px;margin-bottom:12px}
+.rsel-lbl{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);margin-bottom:7px}
+.rsel{width:100%;background:#fff;border:2px solid var(--blue-m);border-radius:var(--rs);color:var(--text);font-family:inherit;font-size:15px;font-weight:700;padding:10px 13px;outline:none;-webkit-appearance:none;cursor:pointer}
+.rsel:focus{border-color:var(--blue)}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.chip{font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px}
+.cb{background:var(--blue-s);color:var(--blue)}.cg{background:var(--green-s);color:var(--green)}
+.ca{background:var(--amber-s);color:var(--amber)}.cr{background:var(--red-s);color:var(--red)}
+.cpur{background:var(--purple-s);color:var(--purple)}
+
+/* FIELDS */
+.field{margin-bottom:11px}
+.field label{display:block;font-size:10px;font-weight:800;color:var(--sub);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
+.field input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:inherit;font-size:18px;font-weight:700;padding:10px 13px;outline:none;-webkit-appearance:none}
+.field input:focus{border-color:var(--blue);background:#fff}
+.field input.af{border-color:var(--green)!important;background:var(--green-s)!important}
+.field input.ov{border-color:var(--amber)!important;background:var(--amber-s)!important}
+.field input[readonly]{opacity:.6;cursor:not-allowed;font-size:15px}
+
+/* SLAB CALCULATOR GRID — 5-col like FC */
+.slab-calc-grid{display:grid;gap:0;border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:12px}
+.sc-header{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr 1fr 1.2fr;background:#0057FF;color:#fff;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.sc-header div,.sc-row div{padding:9px 8px;border-right:1px solid rgba(255,255,255,.1)}
+.sc-header div:last-child,.sc-row div:last-child{border-right:none}
+.sc-row{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr 1fr 1.2fr;border-top:1px solid var(--border);font-size:12px;font-weight:600;transition:background .15s}
+.sc-row div{padding:9px 8px;border-right:1px solid var(--border);color:var(--sub)}
+.sc-row div:last-child{border-right:none}
+.sc-row.active-slab{background:linear-gradient(90deg,#E5FBF4,#EBF2FF);border-left:4px solid var(--green)}
+.sc-row.active-slab div{color:var(--text);font-weight:800}
+.sc-val{font-weight:900;color:var(--text)}
+.sc-earned{font-weight:900;color:var(--green);font-size:13px}
+.sc-q-earned{font-weight:900;color:var(--blue)}
+
+/* RESULT SUMMARY */
+.result-summary{border-radius:var(--rs);padding:16px;background:linear-gradient(135deg,#EBF2FF,#E5FBF4);border:1.5px solid var(--green-m);margin-bottom:12px}
+.rs-label{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);margin-bottom:4px}
+.rs-total{font-size:42px;font-weight:900;color:var(--green);line-height:1;margin-bottom:6px}
+.rs-breakdown{display:flex;gap:8px;flex-wrap:wrap}
+.rs-part{background:rgba(255,255,255,.7);border-radius:8px;padding:6px 10px;font-size:11px;font-weight:800}
+.rs-part .rp-lbl{color:var(--sub);font-size:10px;font-weight:700}
+.rs-part .rp-val{color:var(--text)}
+.rs-part.green .rp-val{color:var(--green)}.rs-part.blue .rp-val{color:var(--blue)}.rs-part.amber .rp-val{color:var(--amber)}
+
+/* PROGRESS */
+.pbar-wrap{margin:10px 0 4px}
+.pbar-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.pbar-lbl{font-size:11px;font-weight:700;color:var(--sub)}
+.pbar-pct{font-size:13px;font-weight:800;color:var(--text)}
+.pbar{height:10px;background:var(--border);border-radius:5px;overflow:hidden}
+.pbar-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#0057FF,#00C48C);transition:width .4s}
+.pbar-fill.green{background:linear-gradient(90deg,#00C896,#6C63FF)}
+
+/* NUDGE */
+.nudge{background:linear-gradient(135deg,#EBF2FF,#E5FBF4);border:1.5px solid var(--green-m);border-radius:var(--rs);padding:11px 13px;margin-top:10px;font-size:12px;font-weight:700;color:var(--blue);line-height:1.6}
+.nudge strong{color:var(--purple)}
+
+/* TRIP CARDS */
+.trip-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.trip-card{border-radius:var(--rs);padding:14px;border:1.5px solid;position:relative;overflow:hidden}
+.trip-card.turkey{background:linear-gradient(135deg,#FFFBF0,#FFF3D4);border-color:#FDE68A}
+.trip-card.swiss{background:linear-gradient(135deg,#F0F4FF,#E8E4FF);border-color:var(--blue-m)}
+.trip-emoji{font-size:26px;margin-bottom:5px;display:block}
+.trip-name{font-size:12px;font-weight:900;margin-bottom:2px}
+.trip-card.turkey .trip-name{color:#92400E}.trip-card.swiss .trip-name{color:var(--blue)}
+.trip-detail{font-size:10px;font-weight:700;color:var(--sub);margin-bottom:7px}
+.trip-target-lbl{font-size:10px;font-weight:800;color:var(--sub)}
+.trip-target-val{font-size:13px;font-weight:900;color:var(--text);margin-bottom:7px}
+.trip-bar{height:6px;background:rgba(0,0,0,.08);border-radius:3px;overflow:hidden;margin-bottom:3px}
+.trip-fill{height:100%;border-radius:3px;transition:width .4s}
+.trip-card.turkey .trip-fill{background:linear-gradient(90deg,#F59E0B,#FCD34D)}
+.trip-card.swiss .trip-fill{background:linear-gradient(90deg,#6C63FF,#A78BFF)}
+.trip-pct{font-size:10px;font-weight:700;color:var(--sub)}
+.trip-unlocked{font-size:11px;font-weight:800;color:var(--green);margin-top:4px}
+
+/* MONTHLY DATA TABLE */
+.month-upload-area{border:2.5px dashed var(--border);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:12px;background:#fff}
+.month-upload-area:hover,.month-upload-area.drag{border-color:var(--blue);background:var(--blue-s)}
+.mu-icon{font-size:36px;margin-bottom:8px}
+.mu-title{font-size:14px;font-weight:900;color:var(--text);margin-bottom:4px}
+.mu-sub{font-size:11px;font-weight:600;color:var(--sub)}
+.mu-btn{display:inline-block;margin-top:12px;background:var(--blue);color:#fff;font-family:inherit;font-weight:800;font-size:13px;padding:10px 20px;border-radius:var(--rs);border:none;cursor:pointer}
+.mdata-wrap{overflow-x:auto;border-radius:var(--rs);border:1.5px solid var(--border);margin-bottom:12px}
+.mdata-tbl{width:100%;border-collapse:collapse;font-size:12px;min-width:560px}
+.mdata-tbl th{background:#0057FF;color:#fff;font-weight:800;padding:9px 10px;text-align:left;white-space:nowrap;font-size:11px}
+.mdata-tbl td{padding:9px 10px;border-bottom:1px solid var(--bg);font-weight:600;white-space:nowrap}
+.mdata-tbl tr:last-child td{border-bottom:none}
+.mdata-tbl tr:nth-child(even) td{background:var(--bg)}
+.tbl-earn{font-weight:900;color:var(--green)}
+.tbl-q-earn{font-weight:900;color:var(--blue)}
+
+/* ADMIN */
+.apanel{background:#fff;border:2px solid #0057FF;border-radius:var(--r);padding:16px;margin-bottom:12px}
+.aptitle{font-size:14px;font-weight:900;color:#0057FF;margin-bottom:13px}
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.afield label{font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:4px;display:block}
+.afield input{width:100%;background:var(--bg);border:1.5px solid #0057FF;border-radius:var(--rs);color:var(--text);font-family:inherit;font-size:14px;font-weight:700;padding:9px 12px;outline:none}
+.asave{width:100%;margin-top:13px;background:#0057FF;color:#fff;font-family:inherit;font-weight:800;font-size:14px;padding:12px;border:none;border-radius:var(--rs);cursor:pointer}
+.anote{font-size:11px;color:var(--sub);font-weight:600;margin-top:9px;padding:10px;background:var(--amber-s);border-radius:8px;line-height:1.6}
+
+/* PIN */
+.modal-bg{position:fixed;inset:0;background:rgba(30,16,53,.6);z-index:500;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-bg.hidden{display:none}
+.modal{background:#fff;border-radius:var(--r);padding:26px 22px;width:90%;max-width:330px}
+.modal-title{font-size:20px;font-weight:900;color:var(--text);margin-bottom:5px}
+.modal-sub{font-size:13px;font-weight:600;color:var(--sub);margin-bottom:18px;line-height:1.5}
+.pin-dots{display:flex;gap:10px;justify-content:center;margin-bottom:18px}
+.pin-dot{width:15px;height:15px;border-radius:50%;background:var(--border)}
+.pin-dot.filled{background:var(--blue)}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.nbtn{background:var(--bg);border:1.5px solid var(--border);border-radius:11px;font-size:22px;font-weight:900;color:var(--text);padding:15px;cursor:pointer;text-align:center;font-family:inherit}
+.nbtn:active{background:var(--blue-s);border-color:var(--blue);color:var(--blue)}
+.nbtn.del{font-size:15px;font-weight:800}.nbtn.cancel{background:none;color:var(--sub);font-size:13px;font-weight:800}
+.pin-err{text-align:center;font-size:12px;font-weight:800;color:var(--red);margin-top:9px;min-height:17px}
+
+/* MISC */
+.toast{display:none;position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#05112A;color:#fff;font-weight:800;font-size:13px;padding:11px 20px;border-radius:28px;z-index:999;white-space:nowrap;font-family:inherit}
+.divider{height:1px;background:var(--border);margin:12px 0}
+.vstamp{text-align:center;font-size:10px;font-weight:700;color:var(--dim);padding:18px 0 8px}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.mc{background:var(--bg);border:1.5px solid var(--border);border-radius:var(--rs);padding:10px}
+.mc .ml{font-size:10px;font-weight:800;color:var(--dim);text-transform:uppercase;margin-bottom:2px}
+.mc .mv{font-size:15px;font-weight:900;color:var(--text)}
+.mv.green{color:var(--green)}.mv.blue{color:var(--blue)}.mv.red{color:var(--red)}.mv.amber{color:var(--amber)}
+
+/* OVERRIDE CALLOUT */
+.ov-callout{background:var(--amber-s);border:1.5px solid var(--amber-m);border-radius:var(--rs);padding:9px 12px;font-size:12px;font-weight:700;color:#92400E;line-height:1.6;margin-bottom:10px;display:none}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast">✅ Saved!</div>
+
+<!-- PIN MODAL -->
+<div class="modal-bg hidden" id="pin-modal">
+  <div class="modal">
+    <div class="modal-title">Admin Access</div>
+    <div class="modal-sub">Enter 4-digit PIN to unlock.</div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="numpad">
+      <button class="nbtn" onclick="pinKey('1')">1</button><button class="nbtn" onclick="pinKey('2')">2</button><button class="nbtn" onclick="pinKey('3')">3</button>
+      <button class="nbtn" onclick="pinKey('4')">4</button><button class="nbtn" onclick="pinKey('5')">5</button><button class="nbtn" onclick="pinKey('6')">6</button>
+      <button class="nbtn" onclick="pinKey('7')">7</button><button class="nbtn" onclick="pinKey('8')">8</button><button class="nbtn" onclick="pinKey('9')">9</button>
+      <button class="nbtn cancel" onclick="closePin()">Cancel</button><button class="nbtn" onclick="pinKey('0')">0</button><button class="nbtn del" onclick="pinDel()">⌫</button>
+    </div>
+    <div class="pin-err" id="pin-err"></div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-inner">
+    <div class="logo-wrap" style="background:linear-gradient(135deg,#05112A,#0A2240);overflow:hidden;padding:6px;border-radius:11px">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="48" height="48">
+  <defs>
+    <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0057FF"></stop>
+      <stop offset="100%" stop-color="#00C48C"></stop>
+    </linearGradient>
+  </defs>
+  <!-- Outer U arc -->
+  <path d="M12 10 L12 50 Q12 70 40 70 Q68 70 68 50 L68 10" fill="none" stroke="url(#lg)" stroke-width="7" stroke-linecap="round"></path>
+  <!-- Inner left arc -->
+  <path d="M22 10 L22 46 Q22 60 40 60 Q58 60 58 46 L58 10" fill="none" stroke="url(#lg)" stroke-width="7" stroke-linecap="round"></path>
+  <!-- Inner center stem -->
+  <path d="M40 10 L40 55" fill="none" stroke="url(#lg)" stroke-width="7" stroke-linecap="round"></path>
+</svg>
+    </div>
+    <div class="hdr-copy">
+      <div class="hdr-brand">Underlinen · FCUK · PUMA</div>
+      <div class="hdr-title">Distributor Incentive Hub</div>
+      <div class="hdr-sub">NSV Scheme Portal · FY 2025–26</div>
+    </div>
+    <div class="hdr-btns">
+      <button class="hdr-btn" id="admin-btn" onclick="toggleAdmin()">⚙</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN BAR -->
+<div class="adminbar" id="adminbar">
+  <span class="abar-lbl">🔓 Admin</span>
+  <span class="abar-info" id="abar-info">Edit mode active</span>
+  <button class="abtn abtn-ghost" onclick="goTab('admin-settings')">Settings</button>
+  <button class="abtn abtn-red" onclick="logoutAdmin()">Lock</button>
+</div>
+
+<!-- UPLOAD BAR (admin only) -->
+<div class="upbar" id="upbar">
+  <button class="up-btn" onclick="document.getElementById('fi').click()">📄 Upload Excel</button>
+  <div class="up-st ok" id="up-st">✓ 74 distributors loaded from Dist_Incentive_Template-Q1.xlsx</div>
+  <input type="file" id="fi" accept=".xlsx,.xls" style="display:none" onchange="handleUpload(this)">
+</div>
+
+<!-- TABS -->
+<div class="tabs t1" id="tabs">
+  <button class="tab active" onclick="goTab('calculator',this)">🧮 Calculator</button>
+  <button class="tab" id="monthly-tab" onclick="goTab('monthly',this)" style="">📊 Monthly Data</button>
+  <button class="tab" onclick="goTab('trips',this)">✈️ Trips</button>
+  <button class="tab" onclick="goTab('scheme',this)">📋 Scheme</button>
+  <button class="tab" id="admin-tab" onclick="goTab('admin-settings',this)" style="display:none;color:var(--purple)">⚙</button>
+</div>
+
+
+<!-- ══════════════════ CALCULATOR ══════════════════ -->
+<div class="sec" id="sec-calculator">
+
+  <div class="rsel-wrap">
+    <div class="rsel-lbl">🏭 Select Distributor</div>
+    <select class="rsel" id="sel-dist" onchange="applyDist()"><option value="">— Choose distributor —</option><option value="0">DIST-000016 · Kamal And Karan Apparels (South)</option><option value="1">DIST-000175 · S L Enterprises (South)</option><option value="2">DIST-000017 · Dhanvith Manikanta Distributors (South)</option><option value="3">DIST-000036 · Eeshan Enterprises (South)</option><option value="4">DIST-000047 · Pranav Agencies (South)</option><option value="5">DIST-000038 · Pc Sales Corp (South)</option><option value="6">TR-RET-000057 · Mathew Garments (South)</option><option value="7">DIST-000166 · Sri Vinayaka Enterprises (South)</option><option value="8">DIST-000171 · Funny Distributor (South)</option><option value="9">DIST-000174 · Shree Balaji Agencies (South)</option><option value="10">DIST-000162 · Prakash Ready Made (South)</option><option value="11">DIST-000128 · Smart Trading (South)</option><option value="12">DIST-000155 · Sri Abi Agencies (South)</option><option value="13">DIST-000156 · Foursquare Inc (Puma &amp; Fcuk) (South)</option><option value="14">DIST-000145 · Bhagyasri Cut Pieces (South)</option><option value="15">DIST-000006 · Invicto Fashion (North)</option><option value="16">DIST-000077 · Sash Vestures (North)</option><option value="17">DIST-000043 · Kirti Collection (North)</option><option value="18">DIST-000039 · Panchanan International Pvt Ltd (North)</option><option value="19">DIST-000032 · Bhandari Agencies (North)</option><option value="20">DIST-000003 · Rbs Clothing (North)</option><option value="21">DIST-000044 · Mk Enterprises (North)</option><option value="22">DIST-000164 · M/s S.S ENTERPRISES (North)</option><option value="23">DIST-000018 · Vedarshi Associates (North)</option><option value="24">DIST-000005 · Indian Textiles (North)</option><option value="25">DIST-000112 · Pratham Traders (North)</option><option value="26">DIST-000009 · Kapil Enterprises (North)</option><option value="27">DIST-000063 · Creation (North)</option><option value="28">DIST-000183 · ANU MARKETING (North)</option><option value="29">DIST-000093 · Sawhney Enterprises (North)</option><option value="30">DIST-000074 · R.S.Traders (North)</option><option value="31">DIST-000154 · M/S Abhishek Trading Co. (North)</option><option value="32">DIST-000159 · M/S Sahil Enterprises (North)</option><option value="33">DIST-000028 · Bsk Enterprises (East)</option><option value="34">DIST-000027 · C2D Distributors (East)</option><option value="35">DIST-000053 · Vinayak Fashions (East)</option><option value="36">DIST-000011 · A K Garments (East)</option><option value="37">DIST-000115 · Bhagwati Maa Enterprises (East)</option><option value="38">DIST-000049 · Parbati Agencies (East)</option><option value="39">DIST-000061 · Krishna Marketing (East)</option><option value="40">DIST-000090 · M/S MANJULA (East)</option><option value="41">DIST-000147 · Rudralay Enterprises (East)</option><option value="42">DIST-000118 · M/S Kashliwal Hosiery (East)</option><option value="43">DIST-000151 · Pandey Sales Agency (East)</option><option value="44">DIST-000010 · Sri Sai Enterprises (East)</option><option value="45">DIST-000030 · KUNAL TRADING COMPANY (West)</option><option value="46">DIST-000161 · Vishnu Enterprise (West)</option><option value="47">DIST-000108 · Nivanshi Enterprises (West)</option><option value="48">DIST-000056 · GALAXY ENTERPRISE (West)</option><option value="49">DIST-000119 · Angel Enterprise (West)</option><option value="50">DIST-000060 · Maruti Traders (West)</option><option value="51">DIST-000055 · JWISHA ENTERPRISE (West)</option><option value="52">DIST-000055 · Jwisha Enterprise (West)</option><option value="53">DIST-000042 · Global Swank (West)</option><option value="54">DIST-000026 · RISHAV LIFESTYLES (West)</option><option value="55">DIST-000172 · Rithysha Fashion (West)</option><option value="56">DIST-000122 · S S Enterprises (West)</option><option value="57">DIST-000088 · Mitra Enterprises (West)</option><option value="58">DIST-000167 · Saavi Enterprises (West)</option><option value="59">DIST-000170 · Pushpa Sale Agencies (West)</option><option value="60">DIST-000110 · Shree Garments (West)</option><option value="61">DIST-000113 · Epic Deal Gandhi Llp (West)</option><option value="62">DIST-000094 · Lykke Lifestyle Llp (West)</option><option value="63">DIST-000071 · LABHESH AGENCIES (West)</option><option value="64">DIST-000148 · Dr Ventures (West)</option><option value="65">DIST-000153 · Yashwardhan Creations (West)</option><option value="66">DIST-000076 · Harivansh Traders (North)</option><option value="67">DIST-000070 · JAGDAMBA ENTERPRISES (West)</option><option value="68">DIST-000121 · Yashika Agencies (West)</option><option value="69">DIST-000169 · Rk Sales (West)</option><option value="70">DIST-000064 · ARORA'S SHOPPY (West)</option><option value="71">DIST-000081 · GLAMZONE APPARELS PRIVATE LIMITED (East)</option><option value="72">DIST-000086 · Shree Mahalasa and Co (West)</option><option value="73">DIST-000148 · DR VENTURES (West)</option></select>
+    <div class="chips" id="chips-dist"><span class="chip cb">DIST-000016</span><span class="chip cg">South</span><span class="chip ca">Apr-26: Act Rs.2,75,292 / Tgt Rs.5,00,000</span><span class="chip ca">46143: Act Rs.1 / Tgt Rs.5,00,000</span><span class="chip ca">46174: Act Rs.1 / Tgt Rs.5,00,000</span></div>
+  </div>
+
+  <!-- OVERRIDE CALLOUT -->
+  <div class="ov-callout" id="ov-callout" style="display:none" style="display: none;">
+    ✎ You have changed one or more admin-set figures. This is your personal projection only — it does not update company records.
+    <br><button onclick="resetToAdmin()" style="margin-top:6px;background:none;border:none;color:var(--blue);font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;text-decoration:underline;padding:0">↺ Reset all to admin data</button>
+  </div>
+
+  <!-- NSV INPUTS — M1, M2, M3 + quarterly auto-sum -->
+  <div class="card">
+    <div class="ctitle">NSV Values <span class="pill pr">Monthly &amp; Quarterly</span></div>
+    <div style="font-size:10px;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Monthly Actuals</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div class="field">
+        <label id="lbl-m1">Apr-26 NSV (Rs.)</label>
+        <input type="number" id="v-m1" value="0" oninput="onNsvChange(1)" placeholder="0" class="">
+        <div id="tag-m1" style="font-size: 10px; font-weight: 700; margin-top: 3px; display: block; color: var(--green);">● Admin data · Target: Rs.5,00,000</div>
+      </div>
+      <div class="field">
+        <label id="lbl-m2">46143 NSV (Rs.)</label>
+        <input type="number" id="v-m2" value="0" oninput="onNsvChange(2)" placeholder="0" class="">
+        <div id="tag-m2" style="font-size: 10px; font-weight: 700; margin-top: 3px; display: block; color: var(--green);">● Admin data · Target: Rs.5,00,000</div>
+      </div>
+      <div class="field">
+        <label id="lbl-m3">46174 NSV (Rs.)</label>
+        <input type="number" id="v-m3" value="0" oninput="onNsvChange(3)" placeholder="0" class="">
+        <div id="tag-m3" style="font-size: 10px; font-weight: 700; margin-top: 3px; display: block; color: var(--green);">● Admin data · Target: Rs.5,00,000</div>
+      </div>
+      <div class="field">
+        <label>Quarterly NSV Actual (M1+M2+M3, Rs.)</label>
+        <input type="text" id="v-quarterly" value="0" readonly="" style="background:var(--green-s)!important;border-color:var(--green-m)!important;color:var(--green)!important;font-size:16px;cursor:default">
+      </div>
+    </div>
+    <div style="height:1px;background:var(--border);margin-bottom:14px"></div>
+    <div style="font-size:10px;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Quarterly Target &amp; Achievement</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="field">
+        <label>Quarterly NSV Target (Rs.) <span id="q-tgt-tag" style="font-size: 9px; color: var(--green); display: inline;">● Admin</span></label>
+        <input type="number" id="v-q-target" value="0" oninput="calc()" placeholder="0">
+        <div id="tag-qtgt" style="font-size: 10px; font-weight: 700; margin-top: 3px; display: block; color: var(--green);">● Auto-sum of monthly targets: Rs.15,00,000</div>
+      </div>
+      <div class="field">
+        <label>Quarterly Achievement %</label>
+        <input type="text" id="v-q-ach" value="—" readonly="" style="background:var(--blue-s)!important;border-color:var(--blue-m)!important;color:var(--blue)!important;font-size:16px;cursor:default">
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT SUMMARY -->
+  <div class="result-summary">
+    <div class="rs-label">Total Incentive Earned (Monthly + Quarterly)</div>
+    <div class="rs-total" id="rs-total">Rs. 0</div>
+    <div class="rs-breakdown" id="rs-breakdown"><div class="rs-part"><div class="rp-lbl">Status</div><div class="rp-val">Below 90% — no incentive</div></div></div>
+  </div>
+
+  <!-- SLAB TRACKER — same grid as FC, 5 columns -->
+  <div class="card">
+    <div class="ctitle">Live Slab Tracker <span class="pill pg">All 3 Months</span></div>
+    <div style="overflow-x:auto">
+      <div class="slab-calc-grid" id="slab-calc-grid">
+        <div class="sc-header">
+          <div>Slab</div>
+          <div>M1</div>
+          <div>M2</div>
+          <div>M3</div>
+          <div>Quarterly</div>
+          <div>Total</div>
+        </div>
+      <div class="sc-row"><div class="sc-val">90% – 99%<br><span style="font-weight:900;font-size:12px;color:var(--amber)">0.5%</span></div><div><span style="color:var(--dim)">—</span></div><div><span style="color:var(--dim)">—</span></div><div><span style="color:var(--dim)">—</span></div><div><span style="color:var(--dim)">—</span></div><div><span style="color:var(--dim)">—</span></div></div><div class="sc-row"><div class="sc-val">100% – 109%<br><span style="font-weight:900;font-size:12px;color:var(--green)">1.0%</span></div><div><span style="color:var(--dim)">—</span></div><div><span style="color:var(--dim)">—</span></div><div><span style="color:var(--dim)">—</span></div><div><span style="color:var(--dim)">—</span></div><div><span style="color:var(--dim)">—</span></div></div><div class="sc-row"><div class="sc-val">110% and above<br><span style="font-weight:900;font-size:12px;color:var(--blue)">1.5%</span></div><div><span style="color:var(--dim)">—</span></div><div><span style="color:var(--dim)">—</span></div><div><span style="color:var(--dim)">—</span></div><div><span style="color:var(--dim)">—</span></div><div><span style="color:var(--dim)">—</span></div></div></div>
+    </div>
+    <div class="nudge" id="nudge" style="display: block;">💡 <strong>Rs.10,74,706 more NSV</strong> across remaining months to reach 90% minimum slab (0.5%)</div>
+    <div class="nudge" id="nudge-q" style="display: block; margin-top: 6px; background: linear-gradient(135deg,var(--blue-s),var(--green-s)); border-color: var(--blue-m); color: var(--blue);">📊 Quarterly: <strong>Rs.10,74,706 more NSV</strong> to reach 90% (0.5%) slab · current: 18.4%</div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="card">
+    <div class="ctitle">Progress to Next Slab</div>
+    <div class="pbar-wrap">
+      <div class="pbar-row"><span class="pbar-lbl">Average monthly achievement progress</span><span class="pbar-pct" id="prog-m-pct">18.4% achieved · 71.6% more to 90%</span></div>
+      <div class="pbar"><div class="pbar-fill " id="prog-m" style="width: 16.6845%;"></div></div>
+    </div>
+    <div class="pbar-wrap">
+      <div class="pbar-row"><span class="pbar-lbl">Quarterly NSV achievement vs. quarterly target</span><span class="pbar-pct" id="prog-q-pct">18.4% quarterly achievement</span></div>
+      <div class="pbar"><div class="pbar-fill " id="prog-q" style="width: 18.3529%;"></div></div>
+    </div>
+  </div>
+
+  <!-- TRIP MINI -->
+  <div class="card">
+    <div class="ctitle">Trip Progress ✈️</div>
+    <div class="trip-grid">
+      <div class="trip-card turkey">
+        <span class="trip-emoji">🇹🇷</span>
+        <div class="trip-name">TURKEY</div>
+        <div class="trip-detail">4 Nights / 5 Days</div>
+        <div class="trip-target-lbl">6M NSV Target</div>
+        <div class="trip-target-val" id="mini-turkey-target">6-Month ≥ Rs.9,00,000</div>
+        <div class="trip-bar"><div class="trip-fill" id="mini-turkey-fill" style="width:0%"></div></div>
+        <div class="trip-pct" id="mini-turkey-pct">0 of 6 retailers qualified</div>
+        <div class="trip-unlocked" id="mini-turkey-ok" style="display:none">✅ Unlocked!</div>
+      </div>
+      <div class="trip-card swiss">
+        <span class="trip-emoji">🇨🇭</span>
+        <div class="trip-name">SWITZERLAND</div>
+        <div class="trip-detail">5 Nights / 6 Days</div>
+        <div class="trip-target-lbl">Annual NSV Target</div>
+        <div class="trip-target-val" id="mini-swiss-target">Annual ≥ Rs.18,00,000</div>
+        <div class="trip-bar"><div class="trip-fill" id="mini-swiss-fill" style="width:0%"></div></div>
+        <div class="trip-pct" id="mini-swiss-pct">0 of 6 retailers qualified</div>
+        <div class="trip-unlocked" id="mini-swiss-ok" style="display:none">✅ Unlocked!</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════ MONTHLY DATA ══════════════════ -->
+<div class="sec" id="sec-monthly">
+  <div class="card">
+    <div class="ctitle">Upload Distributor Data <span class="pill pb">Excel Format</span></div>
+    <div class="month-upload-area" id="drop-area" onclick="document.getElementById('mfi').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+      <div class="mu-icon">📊</div>
+      <div class="mu-title">Upload 3-Month Distributor File</div>
+      <div class="mu-sub">Columns: Distributor Code · Distributor Name · State/Region · Quarterly Target · M1 Label · M1 Target · M1 Actual · M2 Label · M2 Target · M2 Actual · M3 Label · M3 Target · M3 Actual</div>
+      <button class="mu-btn">Choose File</button>
+    </div>
+    <input type="file" id="mfi" accept=".xlsx,.xls" style="display:none" onchange="handleMonthlyUpload(this)">
+    <div style="text-align:center;margin-bottom:4px">
+      <button onclick="downloadTemplate()" style="background:none;border:none;color:var(--blue);font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;text-decoration:underline">📥 Download Excel Template</button>
+    </div>
+  </div>
+
+  <div id="month-filter-wrap" style="display: block; margin-bottom: 12px;">
+    <div class="card" style="padding:12px 14px">
+      <div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px">Filter by Month</div>
+      <select id="month-filter" onchange="renderMonthlyTable()" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:inherit;font-size:14px;font-weight:700;padding:9px 12px;outline:none;-webkit-appearance:none"><option value="">All Months</option><option value="46143">46143</option><option value="46174">46174</option><option value="Apr-26">Apr-26</option></select>
+    </div>
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="mdata-wrap" id="mdata-wrap" style="display: block;">
+      <table class="mdata-tbl" id="mdata-tbl">
+        <thead>
+          <tr>
+            <th>Distributor</th><th>Region</th><th>Month</th>
+            <th>Target NSV</th><th>Actual NSV</th><th>M Ach%</th>
+            <th>Rate</th><th>M Incentive</th>
+          </tr>
+        </thead>
+        <tbody id="mdata-body"><tr><td style="font-weight:800">Kamal And Karan Apparels<br><span style="font-size:10px;color:var(--dim)">DIST-000016</span></td><td>South</td><td>Apr-26</td><td>Rs.5,00,000</td><td>Rs.2,75,292</td><td style="font-weight:800;color:var(--red)">55.1%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Kamal And Karan Apparels<br><span style="font-size:10px;color:var(--dim)">DIST-000016</span></td><td>South</td><td>46143</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Kamal And Karan Apparels<br><span style="font-size:10px;color:var(--dim)">DIST-000016</span></td><td>South</td><td>46174</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">S L Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000175</span></td><td>South</td><td>Apr-26</td><td>Rs.4,00,000</td><td>Rs.91,418</td><td style="font-weight:800;color:var(--red)">22.9%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">S L Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000175</span></td><td>South</td><td>46143</td><td>Rs.4,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">S L Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000175</span></td><td>South</td><td>46174</td><td>Rs.4,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Dhanvith Manikanta Distributors<br><span style="font-size:10px;color:var(--dim)">DIST-000017</span></td><td>South</td><td>Apr-26</td><td>Rs.5,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Dhanvith Manikanta Distributors<br><span style="font-size:10px;color:var(--dim)">DIST-000017</span></td><td>South</td><td>46143</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Dhanvith Manikanta Distributors<br><span style="font-size:10px;color:var(--dim)">DIST-000017</span></td><td>South</td><td>46174</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Eeshan Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000036</span></td><td>South</td><td>Apr-26</td><td>Rs.9,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Eeshan Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000036</span></td><td>South</td><td>46143</td><td>Rs.9,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Eeshan Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000036</span></td><td>South</td><td>46174</td><td>Rs.9,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Pranav Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000047</span></td><td>South</td><td>Apr-26</td><td>Rs.2,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Pranav Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000047</span></td><td>South</td><td>46143</td><td>Rs.2,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Pranav Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000047</span></td><td>South</td><td>46174</td><td>Rs.2,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Pc Sales Corp<br><span style="font-size:10px;color:var(--dim)">DIST-000038</span></td><td>South</td><td>Apr-26</td><td>Rs.8,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Pc Sales Corp<br><span style="font-size:10px;color:var(--dim)">DIST-000038</span></td><td>South</td><td>46143</td><td>Rs.8,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Pc Sales Corp<br><span style="font-size:10px;color:var(--dim)">DIST-000038</span></td><td>South</td><td>46174</td><td>Rs.8,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Mathew Garments<br><span style="font-size:10px;color:var(--dim)">TR-RET-000057</span></td><td>South</td><td>Apr-26</td><td>Rs.8,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Mathew Garments<br><span style="font-size:10px;color:var(--dim)">TR-RET-000057</span></td><td>South</td><td>46143</td><td>Rs.8,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Mathew Garments<br><span style="font-size:10px;color:var(--dim)">TR-RET-000057</span></td><td>South</td><td>46174</td><td>Rs.8,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Sri Vinayaka Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000166</span></td><td>South</td><td>Apr-26</td><td>Rs.5,00,000</td><td>Rs.1,97,109</td><td style="font-weight:800;color:var(--red)">39.4%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Sri Vinayaka Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000166</span></td><td>South</td><td>46143</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Sri Vinayaka Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000166</span></td><td>South</td><td>46174</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Funny Distributor<br><span style="font-size:10px;color:var(--dim)">DIST-000171</span></td><td>South</td><td>Apr-26</td><td>Rs.6,50,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Funny Distributor<br><span style="font-size:10px;color:var(--dim)">DIST-000171</span></td><td>South</td><td>46143</td><td>Rs.6,50,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Funny Distributor<br><span style="font-size:10px;color:var(--dim)">DIST-000171</span></td><td>South</td><td>46174</td><td>Rs.6,50,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Shree Balaji Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000174</span></td><td>South</td><td>Apr-26</td><td>Rs.6,50,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Shree Balaji Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000174</span></td><td>South</td><td>46143</td><td>Rs.6,50,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Shree Balaji Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000174</span></td><td>South</td><td>46174</td><td>Rs.6,50,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Prakash Ready Made<br><span style="font-size:10px;color:var(--dim)">DIST-000162</span></td><td>South</td><td>Apr-26</td><td>Rs.5,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Prakash Ready Made<br><span style="font-size:10px;color:var(--dim)">DIST-000162</span></td><td>South</td><td>46143</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Prakash Ready Made<br><span style="font-size:10px;color:var(--dim)">DIST-000162</span></td><td>South</td><td>46174</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Smart Trading<br><span style="font-size:10px;color:var(--dim)">DIST-000128</span></td><td>South</td><td>Apr-26</td><td>Rs.5,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Smart Trading<br><span style="font-size:10px;color:var(--dim)">DIST-000128</span></td><td>South</td><td>46143</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Smart Trading<br><span style="font-size:10px;color:var(--dim)">DIST-000128</span></td><td>South</td><td>46174</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Sri Abi Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000155</span></td><td>South</td><td>Apr-26</td><td>Rs.2,50,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Sri Abi Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000155</span></td><td>South</td><td>46143</td><td>Rs.2,50,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Sri Abi Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000155</span></td><td>South</td><td>46174</td><td>Rs.2,50,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Foursquare Inc (Puma &amp; Fcuk)<br><span style="font-size:10px;color:var(--dim)">DIST-000156</span></td><td>South</td><td>Apr-26</td><td>Rs.8,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Foursquare Inc (Puma &amp; Fcuk)<br><span style="font-size:10px;color:var(--dim)">DIST-000156</span></td><td>South</td><td>46143</td><td>Rs.8,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Foursquare Inc (Puma &amp; Fcuk)<br><span style="font-size:10px;color:var(--dim)">DIST-000156</span></td><td>South</td><td>46174</td><td>Rs.8,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Bhagyasri Cut Pieces<br><span style="font-size:10px;color:var(--dim)">DIST-000145</span></td><td>South</td><td>Apr-26</td><td>Rs.1,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Bhagyasri Cut Pieces<br><span style="font-size:10px;color:var(--dim)">DIST-000145</span></td><td>South</td><td>46143</td><td>Rs.1,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Bhagyasri Cut Pieces<br><span style="font-size:10px;color:var(--dim)">DIST-000145</span></td><td>South</td><td>46174</td><td>Rs.1,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Invicto Fashion<br><span style="font-size:10px;color:var(--dim)">DIST-000006</span></td><td>North</td><td>Apr-26</td><td>Rs.4,80,000</td><td>Rs.1,00,628</td><td style="font-weight:800;color:var(--red)">21.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Invicto Fashion<br><span style="font-size:10px;color:var(--dim)">DIST-000006</span></td><td>North</td><td>46143</td><td>Rs.4,80,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Invicto Fashion<br><span style="font-size:10px;color:var(--dim)">DIST-000006</span></td><td>North</td><td>46174</td><td>Rs.4,80,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Sash Vestures<br><span style="font-size:10px;color:var(--dim)">DIST-000077</span></td><td>North</td><td>Apr-26</td><td>Rs.10,00,000</td><td>Rs.-2,01,058</td><td style="font-weight:800;color:var(--red)">-20.1%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Sash Vestures<br><span style="font-size:10px;color:var(--dim)">DIST-000077</span></td><td>North</td><td>46143</td><td>Rs.10,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Sash Vestures<br><span style="font-size:10px;color:var(--dim)">DIST-000077</span></td><td>North</td><td>46174</td><td>Rs.10,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Kirti Collection<br><span style="font-size:10px;color:var(--dim)">DIST-000043</span></td><td>North</td><td>Apr-26</td><td>Rs.6,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Kirti Collection<br><span style="font-size:10px;color:var(--dim)">DIST-000043</span></td><td>North</td><td>46143</td><td>Rs.6,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Kirti Collection<br><span style="font-size:10px;color:var(--dim)">DIST-000043</span></td><td>North</td><td>46174</td><td>Rs.6,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Panchanan International Pvt Ltd<br><span style="font-size:10px;color:var(--dim)">DIST-000039</span></td><td>North</td><td>Apr-26</td><td>Rs.30,00,000</td><td>Rs.7,99,726</td><td style="font-weight:800;color:var(--red)">26.7%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Panchanan International Pvt Ltd<br><span style="font-size:10px;color:var(--dim)">DIST-000039</span></td><td>North</td><td>46143</td><td>Rs.30,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Panchanan International Pvt Ltd<br><span style="font-size:10px;color:var(--dim)">DIST-000039</span></td><td>North</td><td>46174</td><td>Rs.30,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Bhandari Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000032</span></td><td>North</td><td>Apr-26</td><td>Rs.8,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Bhandari Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000032</span></td><td>North</td><td>46143</td><td>Rs.8,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Bhandari Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000032</span></td><td>North</td><td>46174</td><td>Rs.8,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Rbs Clothing<br><span style="font-size:10px;color:var(--dim)">DIST-000003</span></td><td>North</td><td>Apr-26</td><td>Rs.12,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Rbs Clothing<br><span style="font-size:10px;color:var(--dim)">DIST-000003</span></td><td>North</td><td>46143</td><td>Rs.12,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Rbs Clothing<br><span style="font-size:10px;color:var(--dim)">DIST-000003</span></td><td>North</td><td>46174</td><td>Rs.12,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Mk Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000044</span></td><td>North</td><td>Apr-26</td><td>Rs.10,00,000</td><td>Rs.93,231</td><td style="font-weight:800;color:var(--red)">9.3%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Mk Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000044</span></td><td>North</td><td>46143</td><td>Rs.10,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Mk Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000044</span></td><td>North</td><td>46174</td><td>Rs.10,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">M/s S.S ENTERPRISES<br><span style="font-size:10px;color:var(--dim)">DIST-000164</span></td><td>North</td><td>Apr-26</td><td>Rs.4,80,000</td><td>Rs.56,717</td><td style="font-weight:800;color:var(--red)">11.8%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">M/s S.S ENTERPRISES<br><span style="font-size:10px;color:var(--dim)">DIST-000164</span></td><td>North</td><td>46143</td><td>Rs.4,80,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">M/s S.S ENTERPRISES<br><span style="font-size:10px;color:var(--dim)">DIST-000164</span></td><td>North</td><td>46174</td><td>Rs.4,80,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Vedarshi Associates<br><span style="font-size:10px;color:var(--dim)">DIST-000018</span></td><td>North</td><td>Apr-26</td><td>Rs.2,40,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Vedarshi Associates<br><span style="font-size:10px;color:var(--dim)">DIST-000018</span></td><td>North</td><td>46143</td><td>Rs.2,40,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Vedarshi Associates<br><span style="font-size:10px;color:var(--dim)">DIST-000018</span></td><td>North</td><td>46174</td><td>Rs.2,40,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Indian Textiles<br><span style="font-size:10px;color:var(--dim)">DIST-000005</span></td><td>North</td><td>Apr-26</td><td>Rs.8,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Indian Textiles<br><span style="font-size:10px;color:var(--dim)">DIST-000005</span></td><td>North</td><td>46143</td><td>Rs.8,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Indian Textiles<br><span style="font-size:10px;color:var(--dim)">DIST-000005</span></td><td>North</td><td>46174</td><td>Rs.8,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Pratham Traders<br><span style="font-size:10px;color:var(--dim)">DIST-000112</span></td><td>North</td><td>Apr-26</td><td>Rs.4,80,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Pratham Traders<br><span style="font-size:10px;color:var(--dim)">DIST-000112</span></td><td>North</td><td>46143</td><td>Rs.4,80,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Pratham Traders<br><span style="font-size:10px;color:var(--dim)">DIST-000112</span></td><td>North</td><td>46174</td><td>Rs.4,80,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Kapil Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000009</span></td><td>North</td><td>Apr-26</td><td>Rs.12,00,000</td><td>Rs.59,786</td><td style="font-weight:800;color:var(--red)">5.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Kapil Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000009</span></td><td>North</td><td>46143</td><td>Rs.12,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Kapil Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000009</span></td><td>North</td><td>46174</td><td>Rs.12,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Creation<br><span style="font-size:10px;color:var(--dim)">DIST-000063</span></td><td>North</td><td>Apr-26</td><td>Rs.10,00,000</td><td>Rs.4,71,807</td><td style="font-weight:800;color:var(--red)">47.2%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Creation<br><span style="font-size:10px;color:var(--dim)">DIST-000063</span></td><td>North</td><td>46143</td><td>Rs.10,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Creation<br><span style="font-size:10px;color:var(--dim)">DIST-000063</span></td><td>North</td><td>46174</td><td>Rs.10,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">ANU MARKETING<br><span style="font-size:10px;color:var(--dim)">DIST-000183</span></td><td>North</td><td>Apr-26</td><td>Rs.10,00,000</td><td>Rs.6,21,273</td><td style="font-weight:800;color:var(--red)">62.1%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">ANU MARKETING<br><span style="font-size:10px;color:var(--dim)">DIST-000183</span></td><td>North</td><td>46143</td><td>Rs.10,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">ANU MARKETING<br><span style="font-size:10px;color:var(--dim)">DIST-000183</span></td><td>North</td><td>46174</td><td>Rs.10,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Sawhney Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000093</span></td><td>North</td><td>Apr-26</td><td>Rs.10,00,000</td><td>Rs.1,67,027</td><td style="font-weight:800;color:var(--red)">16.7%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Sawhney Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000093</span></td><td>North</td><td>46143</td><td>Rs.10,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Sawhney Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000093</span></td><td>North</td><td>46174</td><td>Rs.10,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">R.S.Traders<br><span style="font-size:10px;color:var(--dim)">DIST-000074</span></td><td>North</td><td>Apr-26</td><td>Rs.4,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">R.S.Traders<br><span style="font-size:10px;color:var(--dim)">DIST-000074</span></td><td>North</td><td>46143</td><td>Rs.4,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">R.S.Traders<br><span style="font-size:10px;color:var(--dim)">DIST-000074</span></td><td>North</td><td>46174</td><td>Rs.4,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">M/S Abhishek Trading Co.<br><span style="font-size:10px;color:var(--dim)">DIST-000154</span></td><td>North</td><td>Apr-26</td><td>Rs.4,80,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">M/S Abhishek Trading Co.<br><span style="font-size:10px;color:var(--dim)">DIST-000154</span></td><td>North</td><td>46143</td><td>Rs.4,80,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">M/S Abhishek Trading Co.<br><span style="font-size:10px;color:var(--dim)">DIST-000154</span></td><td>North</td><td>46174</td><td>Rs.4,80,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">M/S Sahil Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000159</span></td><td>North</td><td>Apr-26</td><td>Rs.3,20,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">M/S Sahil Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000159</span></td><td>North</td><td>46143</td><td>Rs.3,20,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">M/S Sahil Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000159</span></td><td>North</td><td>46174</td><td>Rs.3,20,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Bsk Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000028</span></td><td>East</td><td>Apr-26</td><td>Rs.5,00,000</td><td>Rs.-1,39,917</td><td style="font-weight:800;color:var(--red)">-28.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Bsk Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000028</span></td><td>East</td><td>46143</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Bsk Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000028</span></td><td>East</td><td>46174</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">C2D Distributors<br><span style="font-size:10px;color:var(--dim)">DIST-000027</span></td><td>East</td><td>Apr-26</td><td>Rs.2,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">C2D Distributors<br><span style="font-size:10px;color:var(--dim)">DIST-000027</span></td><td>East</td><td>46143</td><td>Rs.2,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">C2D Distributors<br><span style="font-size:10px;color:var(--dim)">DIST-000027</span></td><td>East</td><td>46174</td><td>Rs.2,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Vinayak Fashions<br><span style="font-size:10px;color:var(--dim)">DIST-000053</span></td><td>East</td><td>Apr-26</td><td>Rs.3,00,000</td><td>Rs.23,482</td><td style="font-weight:800;color:var(--red)">7.8%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Vinayak Fashions<br><span style="font-size:10px;color:var(--dim)">DIST-000053</span></td><td>East</td><td>46143</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Vinayak Fashions<br><span style="font-size:10px;color:var(--dim)">DIST-000053</span></td><td>East</td><td>46174</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">A K Garments<br><span style="font-size:10px;color:var(--dim)">DIST-000011</span></td><td>East</td><td>Apr-26</td><td>Rs.2,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">A K Garments<br><span style="font-size:10px;color:var(--dim)">DIST-000011</span></td><td>East</td><td>46143</td><td>Rs.2,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">A K Garments<br><span style="font-size:10px;color:var(--dim)">DIST-000011</span></td><td>East</td><td>46174</td><td>Rs.2,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Bhagwati Maa Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000115</span></td><td>East</td><td>Apr-26</td><td>Rs.3,00,000</td><td>Rs.58,728</td><td style="font-weight:800;color:var(--red)">19.6%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Bhagwati Maa Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000115</span></td><td>East</td><td>46143</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Bhagwati Maa Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000115</span></td><td>East</td><td>46174</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Parbati Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000049</span></td><td>East</td><td>Apr-26</td><td>Rs.8,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Parbati Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000049</span></td><td>East</td><td>46143</td><td>Rs.8,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Parbati Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000049</span></td><td>East</td><td>46174</td><td>Rs.8,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Krishna Marketing<br><span style="font-size:10px;color:var(--dim)">DIST-000061</span></td><td>East</td><td>Apr-26</td><td>Rs.3,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Krishna Marketing<br><span style="font-size:10px;color:var(--dim)">DIST-000061</span></td><td>East</td><td>46143</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Krishna Marketing<br><span style="font-size:10px;color:var(--dim)">DIST-000061</span></td><td>East</td><td>46174</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">M/S MANJULA<br><span style="font-size:10px;color:var(--dim)">DIST-000090</span></td><td>East</td><td>Apr-26</td><td>Rs.6,00,000</td><td>Rs.3,26,872</td><td style="font-weight:800;color:var(--red)">54.5%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">M/S MANJULA<br><span style="font-size:10px;color:var(--dim)">DIST-000090</span></td><td>East</td><td>46143</td><td>Rs.6,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">M/S MANJULA<br><span style="font-size:10px;color:var(--dim)">DIST-000090</span></td><td>East</td><td>46174</td><td>Rs.6,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Rudralay Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000147</span></td><td>East</td><td>Apr-26</td><td>Rs.3,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Rudralay Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000147</span></td><td>East</td><td>46143</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Rudralay Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000147</span></td><td>East</td><td>46174</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">M/S Kashliwal Hosiery<br><span style="font-size:10px;color:var(--dim)">DIST-000118</span></td><td>East</td><td>Apr-26</td><td>Rs.2,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">M/S Kashliwal Hosiery<br><span style="font-size:10px;color:var(--dim)">DIST-000118</span></td><td>East</td><td>46143</td><td>Rs.2,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">M/S Kashliwal Hosiery<br><span style="font-size:10px;color:var(--dim)">DIST-000118</span></td><td>East</td><td>46174</td><td>Rs.2,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Pandey Sales Agency<br><span style="font-size:10px;color:var(--dim)">DIST-000151</span></td><td>East</td><td>Apr-26</td><td>Rs.2,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Pandey Sales Agency<br><span style="font-size:10px;color:var(--dim)">DIST-000151</span></td><td>East</td><td>46143</td><td>Rs.2,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Pandey Sales Agency<br><span style="font-size:10px;color:var(--dim)">DIST-000151</span></td><td>East</td><td>46174</td><td>Rs.2,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Sri Sai Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000010</span></td><td>East</td><td>Apr-26</td><td>Rs.9,00,000</td><td>Rs.1,28,390</td><td style="font-weight:800;color:var(--red)">14.3%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Sri Sai Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000010</span></td><td>East</td><td>46143</td><td>Rs.9,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Sri Sai Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000010</span></td><td>East</td><td>46174</td><td>Rs.9,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">KUNAL TRADING COMPANY<br><span style="font-size:10px;color:var(--dim)">DIST-000030</span></td><td>West</td><td>Apr-26</td><td>Rs.3,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">KUNAL TRADING COMPANY<br><span style="font-size:10px;color:var(--dim)">DIST-000030</span></td><td>West</td><td>46143</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">KUNAL TRADING COMPANY<br><span style="font-size:10px;color:var(--dim)">DIST-000030</span></td><td>West</td><td>46174</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Vishnu Enterprise<br><span style="font-size:10px;color:var(--dim)">DIST-000161</span></td><td>West</td><td>Apr-26</td><td>Rs.3,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Vishnu Enterprise<br><span style="font-size:10px;color:var(--dim)">DIST-000161</span></td><td>West</td><td>46143</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Vishnu Enterprise<br><span style="font-size:10px;color:var(--dim)">DIST-000161</span></td><td>West</td><td>46174</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Nivanshi Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000108</span></td><td>West</td><td>Apr-26</td><td>Rs.4,80,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Nivanshi Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000108</span></td><td>West</td><td>46143</td><td>Rs.4,80,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Nivanshi Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000108</span></td><td>West</td><td>46174</td><td>Rs.4,80,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">GALAXY ENTERPRISE<br><span style="font-size:10px;color:var(--dim)">DIST-000056</span></td><td>West</td><td>Apr-26</td><td>Rs.5,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">GALAXY ENTERPRISE<br><span style="font-size:10px;color:var(--dim)">DIST-000056</span></td><td>West</td><td>46143</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">GALAXY ENTERPRISE<br><span style="font-size:10px;color:var(--dim)">DIST-000056</span></td><td>West</td><td>46174</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Angel Enterprise<br><span style="font-size:10px;color:var(--dim)">DIST-000119</span></td><td>West</td><td>Apr-26</td><td>Rs.4,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Angel Enterprise<br><span style="font-size:10px;color:var(--dim)">DIST-000119</span></td><td>West</td><td>46143</td><td>Rs.4,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Angel Enterprise<br><span style="font-size:10px;color:var(--dim)">DIST-000119</span></td><td>West</td><td>46174</td><td>Rs.4,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Maruti Traders<br><span style="font-size:10px;color:var(--dim)">DIST-000060</span></td><td>West</td><td>Apr-26</td><td>Rs.3,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Maruti Traders<br><span style="font-size:10px;color:var(--dim)">DIST-000060</span></td><td>West</td><td>46143</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Maruti Traders<br><span style="font-size:10px;color:var(--dim)">DIST-000060</span></td><td>West</td><td>46174</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">JWISHA ENTERPRISE<br><span style="font-size:10px;color:var(--dim)">DIST-000055</span></td><td>West</td><td>Apr-26</td><td>Rs.6,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">JWISHA ENTERPRISE<br><span style="font-size:10px;color:var(--dim)">DIST-000055</span></td><td>West</td><td>46143</td><td>Rs.6,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">JWISHA ENTERPRISE<br><span style="font-size:10px;color:var(--dim)">DIST-000055</span></td><td>West</td><td>46174</td><td>Rs.6,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Jwisha Enterprise<br><span style="font-size:10px;color:var(--dim)">DIST-000055</span></td><td>West</td><td>Apr-26</td><td>Rs.4,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Jwisha Enterprise<br><span style="font-size:10px;color:var(--dim)">DIST-000055</span></td><td>West</td><td>46143</td><td>Rs.4,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Jwisha Enterprise<br><span style="font-size:10px;color:var(--dim)">DIST-000055</span></td><td>West</td><td>46174</td><td>Rs.4,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Global Swank<br><span style="font-size:10px;color:var(--dim)">DIST-000042</span></td><td>West</td><td>Apr-26</td><td>Rs.6,00,000</td><td>Rs.68,785</td><td style="font-weight:800;color:var(--red)">11.5%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Global Swank<br><span style="font-size:10px;color:var(--dim)">DIST-000042</span></td><td>West</td><td>46143</td><td>Rs.6,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Global Swank<br><span style="font-size:10px;color:var(--dim)">DIST-000042</span></td><td>West</td><td>46174</td><td>Rs.6,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">RISHAV LIFESTYLES<br><span style="font-size:10px;color:var(--dim)">DIST-000026</span></td><td>West</td><td>Apr-26</td><td>Rs.5,00,000</td><td>Rs.1,65,130</td><td style="font-weight:800;color:var(--red)">33.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">RISHAV LIFESTYLES<br><span style="font-size:10px;color:var(--dim)">DIST-000026</span></td><td>West</td><td>46143</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">RISHAV LIFESTYLES<br><span style="font-size:10px;color:var(--dim)">DIST-000026</span></td><td>West</td><td>46174</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Rithysha Fashion<br><span style="font-size:10px;color:var(--dim)">DIST-000172</span></td><td>West</td><td>Apr-26</td><td>Rs.13,00,000</td><td>Rs.3,23,278</td><td style="font-weight:800;color:var(--red)">24.9%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Rithysha Fashion<br><span style="font-size:10px;color:var(--dim)">DIST-000172</span></td><td>West</td><td>46143</td><td>Rs.13,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Rithysha Fashion<br><span style="font-size:10px;color:var(--dim)">DIST-000172</span></td><td>West</td><td>46174</td><td>Rs.13,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">S S Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000122</span></td><td>West</td><td>Apr-26</td><td>Rs.5,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">S S Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000122</span></td><td>West</td><td>46143</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">S S Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000122</span></td><td>West</td><td>46174</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Mitra Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000088</span></td><td>West</td><td>Apr-26</td><td>Rs.6,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Mitra Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000088</span></td><td>West</td><td>46143</td><td>Rs.6,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Mitra Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000088</span></td><td>West</td><td>46174</td><td>Rs.6,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Saavi Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000167</span></td><td>West</td><td>Apr-26</td><td>Rs.5,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Saavi Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000167</span></td><td>West</td><td>46143</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Saavi Enterprises<br><span style="font-size:10px;color:var(--dim)">DIST-000167</span></td><td>West</td><td>46174</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Pushpa Sale Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000170</span></td><td>West</td><td>Apr-26</td><td>Rs.5,00,000</td><td>Rs.2,99,925</td><td style="font-weight:800;color:var(--red)">60.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Pushpa Sale Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000170</span></td><td>West</td><td>46143</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Pushpa Sale Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000170</span></td><td>West</td><td>46174</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Shree Garments<br><span style="font-size:10px;color:var(--dim)">DIST-000110</span></td><td>West</td><td>Apr-26</td><td>Rs.5,20,000</td><td>Rs.52,551</td><td style="font-weight:800;color:var(--red)">10.1%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Shree Garments<br><span style="font-size:10px;color:var(--dim)">DIST-000110</span></td><td>West</td><td>46143</td><td>Rs.5,20,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Shree Garments<br><span style="font-size:10px;color:var(--dim)">DIST-000110</span></td><td>West</td><td>46174</td><td>Rs.5,20,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Epic Deal Gandhi Llp<br><span style="font-size:10px;color:var(--dim)">DIST-000113</span></td><td>West</td><td>Apr-26</td><td>Rs.5,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Epic Deal Gandhi Llp<br><span style="font-size:10px;color:var(--dim)">DIST-000113</span></td><td>West</td><td>46143</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Epic Deal Gandhi Llp<br><span style="font-size:10px;color:var(--dim)">DIST-000113</span></td><td>West</td><td>46174</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Lykke Lifestyle Llp<br><span style="font-size:10px;color:var(--dim)">DIST-000094</span></td><td>West</td><td>Apr-26</td><td>Rs.10,00,000</td><td>Rs.1,21,610</td><td style="font-weight:800;color:var(--red)">12.2%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Lykke Lifestyle Llp<br><span style="font-size:10px;color:var(--dim)">DIST-000094</span></td><td>West</td><td>46143</td><td>Rs.10,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Lykke Lifestyle Llp<br><span style="font-size:10px;color:var(--dim)">DIST-000094</span></td><td>West</td><td>46174</td><td>Rs.10,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">LABHESH AGENCIES<br><span style="font-size:10px;color:var(--dim)">DIST-000071</span></td><td>West</td><td>Apr-26</td><td>Rs.5,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">LABHESH AGENCIES<br><span style="font-size:10px;color:var(--dim)">DIST-000071</span></td><td>West</td><td>46143</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">LABHESH AGENCIES<br><span style="font-size:10px;color:var(--dim)">DIST-000071</span></td><td>West</td><td>46174</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Dr Ventures<br><span style="font-size:10px;color:var(--dim)">DIST-000148</span></td><td>West</td><td>Apr-26</td><td>Rs.3,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Dr Ventures<br><span style="font-size:10px;color:var(--dim)">DIST-000148</span></td><td>West</td><td>46143</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Dr Ventures<br><span style="font-size:10px;color:var(--dim)">DIST-000148</span></td><td>West</td><td>46174</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Yashwardhan Creations<br><span style="font-size:10px;color:var(--dim)">DIST-000153</span></td><td>West</td><td>Apr-26</td><td>Rs.5,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Yashwardhan Creations<br><span style="font-size:10px;color:var(--dim)">DIST-000153</span></td><td>West</td><td>46143</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Yashwardhan Creations<br><span style="font-size:10px;color:var(--dim)">DIST-000153</span></td><td>West</td><td>46174</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Harivansh Traders<br><span style="font-size:10px;color:var(--dim)">DIST-000076</span></td><td>North</td><td>Apr-26</td><td>Rs.8,00,000</td><td>Rs.2,71,376</td><td style="font-weight:800;color:var(--red)">33.9%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Harivansh Traders<br><span style="font-size:10px;color:var(--dim)">DIST-000076</span></td><td>North</td><td>46143</td><td>Rs.8,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Harivansh Traders<br><span style="font-size:10px;color:var(--dim)">DIST-000076</span></td><td>North</td><td>46174</td><td>Rs.8,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">JAGDAMBA ENTERPRISES<br><span style="font-size:10px;color:var(--dim)">DIST-000070</span></td><td>West</td><td>Apr-26</td><td>Rs.3,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">JAGDAMBA ENTERPRISES<br><span style="font-size:10px;color:var(--dim)">DIST-000070</span></td><td>West</td><td>46143</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">JAGDAMBA ENTERPRISES<br><span style="font-size:10px;color:var(--dim)">DIST-000070</span></td><td>West</td><td>46174</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Yashika Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000121</span></td><td>West</td><td>Apr-26</td><td>Rs.5,00,000</td><td>Rs.4,58,342</td><td style="font-weight:800;color:var(--amber)">91.7%</td><td style="font-weight:800;color:var(--green)">0.5%</td><td class="tbl-earn">Rs. 2,292</td></tr><tr><td style="font-weight:800">Yashika Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000121</span></td><td>West</td><td>46143</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Yashika Agencies<br><span style="font-size:10px;color:var(--dim)">DIST-000121</span></td><td>West</td><td>46174</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Rk Sales<br><span style="font-size:10px;color:var(--dim)">DIST-000169</span></td><td>West</td><td>Apr-26</td><td>Rs.3,00,000</td><td>Rs.0</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Rk Sales<br><span style="font-size:10px;color:var(--dim)">DIST-000169</span></td><td>West</td><td>46143</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Rk Sales<br><span style="font-size:10px;color:var(--dim)">DIST-000169</span></td><td>West</td><td>46174</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">ARORA'S SHOPPY<br><span style="font-size:10px;color:var(--dim)">DIST-000064</span></td><td>West</td><td>Apr-26</td><td>Rs.5,00,000</td><td>Rs.1,28,638</td><td style="font-weight:800;color:var(--red)">25.7%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">ARORA'S SHOPPY<br><span style="font-size:10px;color:var(--dim)">DIST-000064</span></td><td>West</td><td>46143</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">ARORA'S SHOPPY<br><span style="font-size:10px;color:var(--dim)">DIST-000064</span></td><td>West</td><td>46174</td><td>Rs.5,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">GLAMZONE APPARELS PRIVATE LIMITED<br><span style="font-size:10px;color:var(--dim)">DIST-000081</span></td><td>East</td><td>Apr-26</td><td>Rs.7,50,000</td><td>Rs.4,36,797</td><td style="font-weight:800;color:var(--red)">58.2%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">GLAMZONE APPARELS PRIVATE LIMITED<br><span style="font-size:10px;color:var(--dim)">DIST-000081</span></td><td>East</td><td>46143</td><td>Rs.7,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">GLAMZONE APPARELS PRIVATE LIMITED<br><span style="font-size:10px;color:var(--dim)">DIST-000081</span></td><td>East</td><td>46174</td><td>Rs.7,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Shree Mahalasa and Co<br><span style="font-size:10px;color:var(--dim)">DIST-000086</span></td><td>West</td><td>Apr-26</td><td>Rs.7,50,000</td><td>Rs.4,36,797</td><td style="font-weight:800;color:var(--red)">58.2%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Shree Mahalasa and Co<br><span style="font-size:10px;color:var(--dim)">DIST-000086</span></td><td>West</td><td>46143</td><td>Rs.7,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">Shree Mahalasa and Co<br><span style="font-size:10px;color:var(--dim)">DIST-000086</span></td><td>West</td><td>46174</td><td>Rs.7,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">DR VENTURES<br><span style="font-size:10px;color:var(--dim)">DIST-000148</span></td><td>West</td><td>Apr-26</td><td>Rs.3,00,000</td><td>Rs.6,176</td><td style="font-weight:800;color:var(--red)">2.1%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">DR VENTURES<br><span style="font-size:10px;color:var(--dim)">DIST-000148</span></td><td>West</td><td>46143</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr><tr><td style="font-weight:800">DR VENTURES<br><span style="font-size:10px;color:var(--dim)">DIST-000148</span></td><td>West</td><td>46174</td><td>Rs.3,00,000</td><td>Rs.1</td><td style="font-weight:800;color:var(--red)">0.0%</td><td style="font-weight:800;color:var(--green)">—</td><td class="tbl-earn">Rs. 0</td></tr></tbody>
+      </table>
+    </div>
+    <div id="mdata-empty" style="text-align: center; padding: 30px; color: var(--dim); font-size: 13px; font-weight: 700; display: none;">
+      No data uploaded yet. Use the upload area above.
+    </div>
+  </div>
+
+  <div id="mdata-summary" style="display: block;">
+    <div class="card">
+      <div class="ctitle">Period Summary <span class="pill pg">Totals</span></div>
+      <div class="mgrid">
+        <div class="mc"><div class="ml">Total Target NSV</div><div class="mv" id="ms-target">Rs. 13,06,90,000</div></div>
+        <div class="mc"><div class="ml">Total Actual NSV</div><div class="mv green" id="ms-actual">Rs. 59,00,064</div></div>
+        <div class="mc"><div class="ml">Overall Achievement</div><div class="mv amber" id="ms-ach">4.5%</div></div>
+        <div class="mc" style="grid-column:1/-1"><div class="ml">Total Incentive Pool</div><div class="mv green" style="font-size:20px" id="ms-total">Rs. 2,292</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════ TRIPS ══════════════════ -->
+<div class="sec" id="sec-trips">
+
+  <!-- Qualification criterion banner -->
+  <div style="background:linear-gradient(135deg,#EBF2FF,#E5FBF4);border:1.5px solid var(--blue-m);border-radius:var(--r);padding:15px;margin-bottom:12px">
+    <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:5px">Trip Qualification Criterion</div>
+    <div style="font-size:15px;font-weight:900;color:var(--text);line-height:1.5;margin-bottom:6px">
+      6+ qualifying retailers from your assigned geography
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px;font-weight:700;color:var(--sub)">
+      <div style="background:rgba(255,255,255,.6);border-radius:8px;padding:8px">
+        🇹🇷 <strong>Turkey</strong><br>Retailer qualifies if 6-month purchase ≥ Rs.9,00,000
+      </div>
+      <div style="background:rgba(255,255,255,.6);border-radius:8px;padding:8px">
+        🇨🇭 <strong>Switzerland</strong><br>Retailer qualifies if annual purchase ≥ Rs.18,00,000
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload card -->
+  <div class="card">
+    <div class="ctitle">Upload Retailer Data <span class="pill pb">Auto-calculate Qualification</span></div>
+    <div class="month-upload-area" id="trip-drop-area" onclick="document.getElementById('trip-fi').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleTripDrop(event)">
+      <div class="mu-icon">🏪</div>
+      <div class="mu-title">Upload Retailer Excel File</div>
+      <div class="mu-sub">
+        Columns: Retailer Name · Outlet Code · Distributor Code · Region ·<br>
+        6M Purchase (Rs.) · Annual Purchase (Rs.)
+      </div>
+      <button class="mu-btn">Choose File</button>
+    </div>
+    <input type="file" id="trip-fi" accept=".xlsx,.xls" style="display:none" onchange="handleTripUpload(this)">
+    <div style="text-align:center;margin-top:4px">
+      <button onclick="downloadRetailerTemplate()" style="background:none;border:none;color:var(--blue);font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;text-decoration:underline">
+        📥 Download Retailer Excel Template
+      </button>
+    </div>
+    <div id="trip-upload-status" style="margin-top:8px;font-size:12px;font-weight:700;color:var(--sub)"></div>
+  </div>
+
+  <!-- Distributor filter (shown after upload) -->
+  <div id="trip-dist-filter" style="display:none;margin-bottom:12px">
+    <div class="card" style="padding:12px 14px">
+      <div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px">Filter by Distributor</div>
+      <select id="trip-dist-sel" onchange="applyTripDistFilter()" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:inherit;font-size:14px;font-weight:700;padding:9px 12px;outline:none;-webkit-appearance:none">
+        <option value="">All Distributors (Geography-wide)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Turkey card -->
+  <div class="card">
+    <div class="ctitle">🇹🇷 Turkey Trip <span class="pill pa">4N/5D</span></div>
+    <div style="background:var(--amber-s);border:1.5px solid var(--amber-m);border-radius:var(--rs);padding:14px;margin-bottom:12px">
+      <div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Qualifying Criterion</div>
+      <div style="font-size:22px;font-weight:900;color:var(--amber);line-height:1.2;margin-bottom:3px" id="trip-turkey-target">6-Month Purchase ≥ Rs.9,00,000</div>
+      <div style="font-size:11px;font-weight:600;color:var(--sub)">Distributor qualifies when 6+ retailers in their geography meet this threshold</div>
+    </div>
+
+    <!-- Manual entry (if no upload) -->
+    <div id="trip-turkey-manual">
+      <div class="field">
+        <label>Qualifying Retailers (enter manually if no upload)</label>
+        <input type="number" id="trip-retailers-turkey" value="0" min="0" oninput="calcTripPage()" placeholder="0" style="font-size:28px;font-weight:900;text-align:center">
+      </div>
+    </div>
+
+    <!-- Auto-count (shown after upload) -->
+    <div id="trip-turkey-auto" style="display:none">
+      <div style="background:var(--green-s);border:1px solid var(--green-m);border-radius:var(--rs);padding:12px;margin-bottom:10px">
+        <div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Auto-calculated from uploaded data</div>
+        <div style="font-size:11px;font-weight:700;color:var(--sub)" id="trip-turkey-retailer-list"></div>
+      </div>
+    </div>
+
+    <div class="pbar-wrap">
+      <div class="pbar-row"><span class="pbar-lbl">Qualification Progress</span><span class="pbar-pct" id="trip-turkey-pct">0 of 6 retailers qualified</span></div>
+      <div class="pbar"><div class="pbar-fill" id="trip-turkey-fill" style="width:0%"></div></div>
+    </div>
+    <div class="mgrid">
+      <div class="mc"><div class="ml">Retailers Qualified</div><div class="mv amber" id="trip-turkey-ach">0 retailers</div></div>
+      <div class="mc"><div class="ml">Still Needed</div><div class="mv red" id="trip-turkey-gap">6 more retailers needed</div></div>
+    </div>
+    <div id="trip-turkey-status" style="margin-top:10px"><span style="font-size:12px;font-weight:700;color:var(--sub)">6 more qualifying retailers needed from your geography</span></div>
+  </div>
+
+  <!-- Switzerland card -->
+  <div class="card">
+    <div class="ctitle">🇨🇭 Switzerland Trip <span class="pill pb">5N/6D</span></div>
+    <div style="background:var(--blue-s);border:1.5px solid var(--blue-m);border-radius:var(--rs);padding:14px;margin-bottom:12px">
+      <div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Qualifying Criterion</div>
+      <div style="font-size:22px;font-weight:900;color:var(--blue);line-height:1.2;margin-bottom:3px" id="trip-swiss-target">Annual Purchase ≥ Rs.18,00,000</div>
+      <div style="font-size:11px;font-weight:600;color:var(--sub)">Distributor qualifies when 6+ retailers in their geography meet this threshold</div>
+    </div>
+
+    <div id="trip-swiss-manual">
+      <div class="field">
+        <label>Qualifying Retailers (enter manually if no upload)</label>
+        <input type="number" id="trip-retailers-swiss" value="0" min="0" oninput="calcTripPage()" placeholder="0" style="font-size:28px;font-weight:900;text-align:center">
+      </div>
+    </div>
+
+    <div id="trip-swiss-auto" style="display:none">
+      <div style="background:var(--blue-s);border:1px solid var(--blue-m);border-radius:var(--rs);padding:12px;margin-bottom:10px">
+        <div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Auto-calculated from uploaded data</div>
+        <div style="font-size:11px;font-weight:700;color:var(--sub)" id="trip-swiss-retailer-list"></div>
+      </div>
+    </div>
+
+    <div class="pbar-wrap">
+      <div class="pbar-row"><span class="pbar-lbl">Qualification Progress</span><span class="pbar-pct" id="trip-swiss-pct">0 of 6 retailers qualified</span></div>
+      <div class="pbar"><div class="pbar-fill" id="trip-swiss-fill" style="width:0%"></div></div>
+    </div>
+    <div class="mgrid">
+      <div class="mc"><div class="ml">Retailers Qualified</div><div class="mv blue" id="trip-swiss-ach">0 retailers</div></div>
+      <div class="mc"><div class="ml">Still Needed</div><div class="mv red" id="trip-swiss-gap">6 more retailers needed</div></div>
+    </div>
+    <div id="trip-swiss-status" style="margin-top:10px"><span style="font-size:12px;font-weight:700;color:var(--sub)">6 more qualifying retailers needed from your geography</span></div>
+  </div>
+
+  <!-- Retailer details table (shown after upload) -->
+  <div id="trip-retailer-table-wrap" style="display:none">
+    <div class="card">
+      <div class="ctitle">Retailer Detail <span class="pill pg" id="trip-tbl-count"></span></div>
+      <div style="overflow-x:auto;border-radius:var(--rs);border:1.5px solid var(--border)">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:500px">
+          <thead>
+            <tr>
+              <th style="background:#0057FF;color:#fff;font-weight:800;padding:9px 10px;text-align:left">Retailer</th>
+              <th style="background:#0057FF;color:#fff;font-weight:800;padding:9px 10px;text-align:left">Code</th>
+              <th style="background:#0057FF;color:#fff;font-weight:800;padding:9px 10px;text-align:left">Distributor</th>
+              <th style="background:#0057FF;color:#fff;font-weight:800;padding:9px 10px;text-align:left">6M Purchase</th>
+              <th style="background:#0057FF;color:#fff;font-weight:800;padding:9px 10px;text-align:left">🇹🇷 Turkey</th>
+              <th style="background:#0057FF;color:#fff;font-weight:800;padding:9px 10px;text-align:left">Annual Purchase</th>
+              <th style="background:#0057FF;color:#fff;font-weight:800;padding:9px 10px;text-align:left">🇨🇭 Swiss</th>
+            </tr>
+          </thead>
+          <tbody id="trip-retailer-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════ SCHEME ══════════════════ -->
+<div class="sec" id="sec-scheme">
+  <div class="card">
+    <div class="ctitle">Incentive Slabs <span class="pill pr">Monthly &amp; Quarterly — Same Rates</span></div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px" id="m-slab-tbl">
+        <thead><tr style="background:#0057FF">
+          <th style="color:#fff;font-weight:800;padding:9px 10px;text-align:left">Achievement</th>
+          <th style="color:#fff;font-weight:800;padding:9px 10px;text-align:left">Monthly Rate</th>
+          <th style="color:#fff;font-weight:800;padding:9px 10px;text-align:left">Basis</th>
+          <th style="color:#fff;font-weight:800;padding:9px 10px;text-align:left">Quarterly Rate</th>
+          <th style="color:#fff;font-weight:800;padding:9px 10px;text-align:left">Basis</th>
+        </tr></thead>
+        <tbody id="m-slab-body"><tr style="border-top: 1px solid var(--bg);"><td style="padding:9px 10px;font-weight:800">90% – 99%</td><td style="padding:9px 10px;font-weight:900;color:var(--amber)">0.5%</td><td style="padding:9px 10px;font-weight:700;color:var(--sub)">Monthly actual NSV</td><td style="padding:9px 10px;font-weight:700;color:var(--amber)">0.5%</td><td style="padding:9px 10px;font-weight:700;color:var(--sub)">Quarterly actual NSV</td></tr><tr style="border-top: 1px solid var(--bg);"><td style="padding:9px 10px;font-weight:800">100% – 109%</td><td style="padding:9px 10px;font-weight:900;color:var(--green)">1.0%</td><td style="padding:9px 10px;font-weight:700;color:var(--sub)">Monthly actual NSV</td><td style="padding:9px 10px;font-weight:700;color:var(--green)">1.0%</td><td style="padding:9px 10px;font-weight:700;color:var(--sub)">Quarterly actual NSV</td></tr><tr style="border-top: 1px solid var(--bg);"><td style="padding:9px 10px;font-weight:800">110% and above</td><td style="padding:9px 10px;font-weight:900;color:var(--blue)">1.5%</td><td style="padding:9px 10px;font-weight:700;color:var(--sub)">Monthly actual NSV</td><td style="padding:9px 10px;font-weight:700;color:var(--blue)">1.5%</td><td style="padding:9px 10px;font-weight:700;color:var(--sub)">Quarterly actual NSV</td></tr></tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px;padding:10px;background:var(--blue-s);border-radius:8px;font-size:11px;font-weight:700;color:var(--blue)">
+      ℹ️ <strong>Monthly:</strong> Each month's actual NSV vs monthly target → same 3 slabs (90%/100%/110%) → rate on full monthly actual NSV.<br><br>
+      ℹ️ <strong>Quarterly:</strong> Quarterly actual NSV vs quarterly target → same 3 slabs → rate on full quarterly actual NSV.<br><br>
+      Total payout = Monthly incentive (M1+M2+M3) + Quarterly incentive.
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Trip Eligibility <span class="pill pa">NSV Targets</span></div>
+    <div class="trip-grid">
+      <div class="trip-card turkey">
+        <span class="trip-emoji">🇹🇷</span>
+        <div class="trip-name">TURKEY TRIP</div>
+        <div class="trip-detail">4 Nights / 5 Days</div>
+        <div style="font-size:11px;font-weight:700;color:var(--sub)">6M Purchase ≥</div>
+        <div style="font-size:14px;font-weight:900" id="sch-turkey">Rs.9,00,000</div>
+        <div style="font-size:10px;font-weight:600;color:var(--sub);margin-top:4px">per qualifying retailer · 6+ needed</div>
+      </div>
+      <div class="trip-card swiss">
+        <span class="trip-emoji">🇨🇭</span>
+        <div class="trip-name">SWITZERLAND</div>
+        <div class="trip-detail">5 Nights / 6 Days</div>
+        <div style="font-size:11px;font-weight:700;color:var(--sub)">Annual Purchase ≥</div>
+        <div style="font-size:14px;font-weight:900" id="sch-swiss">Rs.18,00,000</div>
+        <div style="font-size:10px;font-weight:600;color:var(--sub);margin-top:4px">per qualifying retailer · 6+ needed</div>
+      </div>
+    </div>
+  </div>
+  <div class="vstamp" id="vstamp">Distributor Incentive Portal · FY 2025–26</div>
+</div>
+
+
+<!-- ══════════════════ ADMIN ══════════════════ -->
+<div class="sec" id="sec-admin-settings">
+  <div class="apanel">
+    <div class="aptitle">⚙️ Achievement Slab Rates</div>
+    <div style="font-size:11px;color:var(--sub);font-weight:600;margin-bottom:12px;line-height:1.6">The three slabs are fixed at 90%, 100%, and 110% of monthly target. Edit the incentive rates applied at each slab.</div>
+    <div id="slab-editor"><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; padding: 12px; background: var(--bg); border-radius: var(--rs); border-left: 4px solid rgb(255, 159, 28);"><div class="afield"><label>Achievement Slab</label><div style="background:#fff;border:1.5px solid #1E1035;border-radius:var(--rs);padding:9px 12px;font-size:14px;font-weight:800;color:var(--text)">90% – 99%</div></div><div class="afield"><label>Rate (%)</label><input type="number" step="0.01" id="se-rate-0" value="0.50"></div></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; padding: 12px; background: var(--bg); border-radius: var(--rs); border-left: 4px solid rgb(0, 200, 150);"><div class="afield"><label>Achievement Slab</label><div style="background:#fff;border:1.5px solid #1E1035;border-radius:var(--rs);padding:9px 12px;font-size:14px;font-weight:800;color:var(--text)">100% – 109%</div></div><div class="afield"><label>Rate (%)</label><input type="number" step="0.01" id="se-rate-1" value="1.00"></div></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; padding: 12px; background: var(--bg); border-radius: var(--rs); border-left: 4px solid rgb(108, 99, 255);"><div class="afield"><label>Achievement Slab</label><div style="background:#fff;border:1.5px solid #1E1035;border-radius:var(--rs);padding:9px 12px;font-size:14px;font-weight:800;color:var(--text)">110% and above</div></div><div class="afield"><label>Rate (%)</label><input type="number" step="0.01" id="se-rate-2" value="1.50"></div></div></div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button onclick="addSlab()" style="background:var(--green-s);color:var(--green);border:1.5px solid var(--green-m);border-radius:var(--rs);font-family:inherit;font-weight:800;font-size:12px;padding:8px 14px;cursor:pointer">＋ Add Slab</button>
+      <button onclick="removeSlab()" style="background:var(--red-s);color:var(--red);border:1.5px solid var(--red-m);border-radius:var(--rs);font-family:inherit;font-weight:800;font-size:12px;padding:8px 14px;cursor:pointer">− Remove Last</button>
+    </div>
+  </div>
+  <div class="apanel">
+    <div class="aptitle">⚙️ Trip Retailer Qualification Threshold</div>
+    <div style="font-size:11px;color:var(--sub);font-weight:600;margin-bottom:10px;line-height:1.6">Set the minimum number of qualifying retailers required to earn each trip.</div>
+    <div class="agrid">
+      <div class="afield"><label>Turkey — Min Qualifying Retailers</label><input type="number" id="cfg-turkey" value="6" min="1"></div>
+      <div class="afield"><label>Switzerland — Min Qualifying Retailers</label><input type="number" id="cfg-swiss" value="6" min="1"></div>
+    </div>
+  </div>
+  <div class="apanel">
+    <div class="aptitle">⚙️ Change Admin PIN</div>
+    <div class="agrid">
+      <div class="afield"><label>New PIN (4 digits)</label><input type="number" id="cfg-pin1" placeholder="1234"></div>
+      <div class="afield"><label>Confirm PIN</label><input type="number" id="cfg-pin2" placeholder="1234"></div>
+    </div>
+    <div id="pin-msg" style="margin-top: 8px; font-size: 12px; font-weight: 700; min-height: 18px; color: var(--green);">PIN updated.</div>
+  </div>
+  <div class="apanel">
+    <div class="aptitle">⚙️ Publish</div>
+    <div class="anote">Bakes all settings + uploaded distributor data into the file. Download and share — no server needed. Distributors open the file and see their live data.</div>
+    <button class="asave" onclick="saveSettings()">💾 Save &amp; Download Updated File</button>
+  </div>
+</div>
+
+
+<script>
+// ── CONFIG ──
+var CFG = {
+  "pin": "3690",
+  "lastUpdated": "19 Apr 2026",
+  "trip": {
+    "turkey": 6,
+    "swiss": 6
+  },
+  "slabs": [
+    {
+      "pct": 90,
+      "rate": 0.005,
+      "label": "90% – 99%"
+    },
+    {
+      "pct": 100,
+      "rate": 0.01,
+      "label": "100% – 109%"
+    },
+    {
+      "pct": 110,
+      "rate": 0.015,
+      "label": "110% and above"
+    }
+  ]
+};
+
+// ── EMBEDDED ──
+var EMBEDDED = {"distributors":[{"code":"DIST-000016","name":"Kamal And Karan Apparels","region":"South","qTarget":1500000,"months":[{"label":"Apr-26","target":500000,"actual":275292},{"label":"46143","target":500000,"actual":1},{"label":"46174","target":500000,"actual":1}]},{"code":"DIST-000175","name":"S L Enterprises","region":"South","qTarget":1200000,"months":[{"label":"Apr-26","target":400000,"actual":91418},{"label":"46143","target":400000,"actual":1},{"label":"46174","target":400000,"actual":1}]},{"code":"DIST-000017","name":"Dhanvith Manikanta Distributors","region":"South","qTarget":1500000,"months":[{"label":"Apr-26","target":500000,"actual":0},{"label":"46143","target":500000,"actual":1},{"label":"46174","target":500000,"actual":1}]},{"code":"DIST-000036","name":"Eeshan Enterprises","region":"South","qTarget":2700000,"months":[{"label":"Apr-26","target":900000,"actual":0},{"label":"46143","target":900000,"actual":1},{"label":"46174","target":900000,"actual":1}]},{"code":"DIST-000047","name":"Pranav Agencies","region":"South","qTarget":600000,"months":[{"label":"Apr-26","target":200000,"actual":0},{"label":"46143","target":200000,"actual":1},{"label":"46174","target":200000,"actual":1}]},{"code":"DIST-000038","name":"Pc Sales Corp","region":"South","qTarget":2400000,"months":[{"label":"Apr-26","target":800000,"actual":0},{"label":"46143","target":800000,"actual":1},{"label":"46174","target":800000,"actual":1}]},{"code":"TR-RET-000057","name":"Mathew Garments","region":"South","qTarget":2400000,"months":[{"label":"Apr-26","target":800000,"actual":0},{"label":"46143","target":800000,"actual":1},{"label":"46174","target":800000,"actual":1}]},{"code":"DIST-000166","name":"Sri Vinayaka Enterprises","region":"South","qTarget":1500000,"months":[{"label":"Apr-26","target":500000,"actual":197109},{"label":"46143","target":500000,"actual":1},{"label":"46174","target":500000,"actual":1}]},{"code":"DIST-000171","name":"Funny Distributor","region":"South","qTarget":1950000,"months":[{"label":"Apr-26","target":650000,"actual":0},{"label":"46143","target":650000,"actual":1},{"label":"46174","target":650000,"actual":1}]},{"code":"DIST-000174","name":"Shree Balaji Agencies","region":"South","qTarget":1950000,"months":[{"label":"Apr-26","target":650000,"actual":0},{"label":"46143","target":650000,"actual":1},{"label":"46174","target":650000,"actual":1}]},{"code":"DIST-000162","name":"Prakash Ready Made","region":"South","qTarget":1500000,"months":[{"label":"Apr-26","target":500000,"actual":0},{"label":"46143","target":500000,"actual":1},{"label":"46174","target":500000,"actual":1}]},{"code":"DIST-000128","name":"Smart Trading","region":"South","qTarget":1500000,"months":[{"label":"Apr-26","target":500000,"actual":0},{"label":"46143","target":500000,"actual":1},{"label":"46174","target":500000,"actual":1}]},{"code":"DIST-000155","name":"Sri Abi Agencies","region":"South","qTarget":750000,"months":[{"label":"Apr-26","target":250000,"actual":0},{"label":"46143","target":250000,"actual":1},{"label":"46174","target":250000,"actual":1}]},{"code":"DIST-000156","name":"Foursquare Inc (Puma & Fcuk)","region":"South","qTarget":2400000,"months":[{"label":"Apr-26","target":800000,"actual":0},{"label":"46143","target":800000,"actual":1},{"label":"46174","target":800000,"actual":1}]},{"code":"DIST-000145","name":"Bhagyasri Cut Pieces","region":"South","qTarget":300000,"months":[{"label":"Apr-26","target":100000,"actual":0},{"label":"46143","target":100000,"actual":1},{"label":"46174","target":100000,"actual":1}]},{"code":"DIST-000006","name":"Invicto Fashion","region":"North","qTarget":1440000,"months":[{"label":"Apr-26","target":480000,"actual":100628},{"label":"46143","target":480000,"actual":1},{"label":"46174","target":480000,"actual":1}]},{"code":"DIST-000077","name":"Sash Vestures","region":"North","qTarget":3000000,"months":[{"label":"Apr-26","target":1000000,"actual":-201058},{"label":"46143","target":1000000,"actual":1},{"label":"46174","target":1000000,"actual":1}]},{"code":"DIST-000043","name":"Kirti Collection","region":"North","qTarget":1800000,"months":[{"label":"Apr-26","target":600000,"actual":0},{"label":"46143","target":600000,"actual":1},{"label":"46174","target":600000,"actual":1}]},{"code":"DIST-000039","name":"Panchanan International Pvt Ltd","region":"North","qTarget":9000000,"months":[{"label":"Apr-26","target":3000000,"actual":799726},{"label":"46143","target":3000000,"actual":1},{"label":"46174","target":3000000,"actual":1}]},{"code":"DIST-000032","name":"Bhandari Agencies","region":"North","qTarget":2400000,"months":[{"label":"Apr-26","target":800000,"actual":0},{"label":"46143","target":800000,"actual":1},{"label":"46174","target":800000,"actual":1}]},{"code":"DIST-000003","name":"Rbs Clothing","region":"North","qTarget":3600000,"months":[{"label":"Apr-26","target":1200000,"actual":0},{"label":"46143","target":1200000,"actual":1},{"label":"46174","target":1200000,"actual":1}]},{"code":"DIST-000044","name":"Mk Enterprises","region":"North","qTarget":3000000,"months":[{"label":"Apr-26","target":1000000,"actual":93231},{"label":"46143","target":1000000,"actual":1},{"label":"46174","target":1000000,"actual":1}]},{"code":"DIST-000164","name":"M/s S.S ENTERPRISES","region":"North","qTarget":1440000,"months":[{"label":"Apr-26","target":480000,"actual":56717},{"label":"46143","target":480000,"actual":1},{"label":"46174","target":480000,"actual":1}]},{"code":"DIST-000018","name":"Vedarshi Associates","region":"North","qTarget":720000,"months":[{"label":"Apr-26","target":240000,"actual":0},{"label":"46143","target":240000,"actual":1},{"label":"46174","target":240000,"actual":1}]},{"code":"DIST-000005","name":"Indian Textiles","region":"North","qTarget":2400000,"months":[{"label":"Apr-26","target":800000,"actual":0},{"label":"46143","target":800000,"actual":1},{"label":"46174","target":800000,"actual":1}]},{"code":"DIST-000112","name":"Pratham Traders","region":"North","qTarget":1440000,"months":[{"label":"Apr-26","target":480000,"actual":0},{"label":"46143","target":480000,"actual":1},{"label":"46174","target":480000,"actual":1}]},{"code":"DIST-000009","name":"Kapil Enterprises","region":"North","qTarget":3600000,"months":[{"label":"Apr-26","target":1200000,"actual":59786},{"label":"46143","target":1200000,"actual":1},{"label":"46174","target":1200000,"actual":1}]},{"code":"DIST-000063","name":"Creation","region":"North","qTarget":3000000,"months":[{"label":"Apr-26","target":1000000,"actual":471807},{"label":"46143","target":1000000,"actual":1},{"label":"46174","target":1000000,"actual":1}]},{"code":"DIST-000183","name":"ANU MARKETING","region":"North","qTarget":3000000,"months":[{"label":"Apr-26","target":1000000,"actual":621273},{"label":"46143","target":1000000,"actual":1},{"label":"46174","target":1000000,"actual":1}]},{"code":"DIST-000093","name":"Sawhney Enterprises","region":"North","qTarget":3000000,"months":[{"label":"Apr-26","target":1000000,"actual":167027},{"label":"46143","target":1000000,"actual":1},{"label":"46174","target":1000000,"actual":1}]},{"code":"DIST-000074","name":"R.S.Traders","region":"North","qTarget":1200000,"months":[{"label":"Apr-26","target":400000,"actual":0},{"label":"46143","target":400000,"actual":1},{"label":"46174","target":400000,"actual":1}]},{"code":"DIST-000154","name":"M/S Abhishek Trading Co.","region":"North","qTarget":1440000,"months":[{"label":"Apr-26","target":480000,"actual":0},{"label":"46143","target":480000,"actual":1},{"label":"46174","target":480000,"actual":1}]},{"code":"DIST-000159","name":"M/S Sahil Enterprises","region":"North","qTarget":960000,"months":[{"label":"Apr-26","target":320000,"actual":0},{"label":"46143","target":320000,"actual":1},{"label":"46174","target":320000,"actual":1}]},{"code":"DIST-000028","name":"Bsk Enterprises","region":"East","qTarget":1500000,"months":[{"label":"Apr-26","target":500000,"actual":-139917},{"label":"46143","target":500000,"actual":1},{"label":"46174","target":500000,"actual":1}]},{"code":"DIST-000027","name":"C2D Distributors","region":"East","qTarget":600000,"months":[{"label":"Apr-26","target":200000,"actual":0},{"label":"46143","target":200000,"actual":1},{"label":"46174","target":200000,"actual":1}]},{"code":"DIST-000053","name":"Vinayak Fashions","region":"East","qTarget":900000,"months":[{"label":"Apr-26","target":300000,"actual":23482},{"label":"46143","target":300000,"actual":1},{"label":"46174","target":300000,"actual":1}]},{"code":"DIST-000011","name":"A K Garments","region":"East","qTarget":600000,"months":[{"label":"Apr-26","target":200000,"actual":0},{"label":"46143","target":200000,"actual":1},{"label":"46174","target":200000,"actual":1}]},{"code":"DIST-000115","name":"Bhagwati Maa Enterprises","region":"East","qTarget":900000,"months":[{"label":"Apr-26","target":300000,"actual":58728},{"label":"46143","target":300000,"actual":1},{"label":"46174","target":300000,"actual":1}]},{"code":"DIST-000049","name":"Parbati Agencies","region":"East","qTarget":2400000,"months":[{"label":"Apr-26","target":800000,"actual":0},{"label":"46143","target":800000,"actual":1},{"label":"46174","target":800000,"actual":1}]},{"code":"DIST-000061","name":"Krishna Marketing","region":"East","qTarget":900000,"months":[{"label":"Apr-26","target":300000,"actual":0},{"label":"46143","target":300000,"actual":1},{"label":"46174","target":300000,"actual":1}]},{"code":"DIST-000090","name":"M/S MANJULA","region":"East","qTarget":1800000,"months":[{"label":"Apr-26","target":600000,"actual":326872},{"label":"46143","target":600000,"actual":1},{"label":"46174","target":600000,"actual":1}]},{"code":"DIST-000147","name":"Rudralay Enterprises","region":"East","qTarget":900000,"months":[{"label":"Apr-26","target":300000,"actual":0},{"label":"46143","target":300000,"actual":1},{"label":"46174","target":300000,"actual":1}]},{"code":"DIST-000118","name":"M/S Kashliwal Hosiery","region":"East","qTarget":600000,"months":[{"label":"Apr-26","target":200000,"actual":0},{"label":"46143","target":200000,"actual":1},{"label":"46174","target":200000,"actual":1}]},{"code":"DIST-000151","name":"Pandey Sales Agency","region":"East","qTarget":600000,"months":[{"label":"Apr-26","target":200000,"actual":0},{"label":"46143","target":200000,"actual":1},{"label":"46174","target":200000,"actual":1}]},{"code":"DIST-000010","name":"Sri Sai Enterprises","region":"East","qTarget":2700000,"months":[{"label":"Apr-26","target":900000,"actual":128390},{"label":"46143","target":900000,"actual":1},{"label":"46174","target":900000,"actual":1}]},{"code":"DIST-000030","name":"KUNAL TRADING COMPANY","region":"West","qTarget":900000,"months":[{"label":"Apr-26","target":300000,"actual":0},{"label":"46143","target":300000,"actual":1},{"label":"46174","target":300000,"actual":1}]},{"code":"DIST-000161","name":"Vishnu Enterprise","region":"West","qTarget":900000,"months":[{"label":"Apr-26","target":300000,"actual":0},{"label":"46143","target":300000,"actual":1},{"label":"46174","target":300000,"actual":1}]},{"code":"DIST-000108","name":"Nivanshi Enterprises","region":"West","qTarget":1440000,"months":[{"label":"Apr-26","target":480000,"actual":0},{"label":"46143","target":480000,"actual":1},{"label":"46174","target":480000,"actual":1}]},{"code":"DIST-000056","name":"GALAXY ENTERPRISE","region":"West","qTarget":1500000,"months":[{"label":"Apr-26","target":500000,"actual":0},{"label":"46143","target":500000,"actual":1},{"label":"46174","target":500000,"actual":1}]},{"code":"DIST-000119","name":"Angel Enterprise","region":"West","qTarget":1200000,"months":[{"label":"Apr-26","target":400000,"actual":0},{"label":"46143","target":400000,"actual":1},{"label":"46174","target":400000,"actual":1}]},{"code":"DIST-000060","name":"Maruti Traders","region":"West","qTarget":900000,"months":[{"label":"Apr-26","target":300000,"actual":0},{"label":"46143","target":300000,"actual":1},{"label":"46174","target":300000,"actual":1}]},{"code":"DIST-000055","name":"JWISHA ENTERPRISE","region":"West","qTarget":1800000,"months":[{"label":"Apr-26","target":600000,"actual":0},{"label":"46143","target":600000,"actual":1},{"label":"46174","target":600000,"actual":1}]},{"code":"DIST-000055","name":"Jwisha Enterprise","region":"West","qTarget":1200000,"months":[{"label":"Apr-26","target":400000,"actual":0},{"label":"46143","target":400000,"actual":1},{"label":"46174","target":400000,"actual":1}]},{"code":"DIST-000042","name":"Global Swank","region":"West","qTarget":1800000,"months":[{"label":"Apr-26","target":600000,"actual":68785},{"label":"46143","target":600000,"actual":1},{"label":"46174","target":600000,"actual":1}]},{"code":"DIST-000026","name":"RISHAV LIFESTYLES","region":"West","qTarget":1500000,"months":[{"label":"Apr-26","target":500000,"actual":165130},{"label":"46143","target":500000,"actual":1},{"label":"46174","target":500000,"actual":1}]},{"code":"DIST-000172","name":"Rithysha Fashion","region":"West","qTarget":3900000,"months":[{"label":"Apr-26","target":1300000,"actual":323278},{"label":"46143","target":1300000,"actual":1},{"label":"46174","target":1300000,"actual":1}]},{"code":"DIST-000122","name":"S S Enterprises","region":"West","qTarget":1500000,"months":[{"label":"Apr-26","target":500000,"actual":0},{"label":"46143","target":500000,"actual":1},{"label":"46174","target":500000,"actual":1}]},{"code":"DIST-000088","name":"Mitra Enterprises","region":"West","qTarget":1800000,"months":[{"label":"Apr-26","target":600000,"actual":0},{"label":"46143","target":600000,"actual":1},{"label":"46174","target":600000,"actual":1}]},{"code":"DIST-000167","name":"Saavi Enterprises","region":"West","qTarget":1500000,"months":[{"label":"Apr-26","target":500000,"actual":0},{"label":"46143","target":500000,"actual":1},{"label":"46174","target":500000,"actual":1}]},{"code":"DIST-000170","name":"Pushpa Sale Agencies","region":"West","qTarget":1500000,"months":[{"label":"Apr-26","target":500000,"actual":299925},{"label":"46143","target":500000,"actual":1},{"label":"46174","target":500000,"actual":1}]},{"code":"DIST-000110","name":"Shree Garments","region":"West","qTarget":1560000,"months":[{"label":"Apr-26","target":520000,"actual":52551},{"label":"46143","target":520000,"actual":1},{"label":"46174","target":520000,"actual":1}]},{"code":"DIST-000113","name":"Epic Deal Gandhi Llp","region":"West","qTarget":1500000,"months":[{"label":"Apr-26","target":500000,"actual":0},{"label":"46143","target":500000,"actual":1},{"label":"46174","target":500000,"actual":1}]},{"code":"DIST-000094","name":"Lykke Lifestyle Llp","region":"West","qTarget":3000000,"months":[{"label":"Apr-26","target":1000000,"actual":121610},{"label":"46143","target":1000000,"actual":1},{"label":"46174","target":1000000,"actual":1}]},{"code":"DIST-000071","name":"LABHESH AGENCIES","region":"West","qTarget":1500000,"months":[{"label":"Apr-26","target":500000,"actual":0},{"label":"46143","target":500000,"actual":1},{"label":"46174","target":500000,"actual":1}]},{"code":"DIST-000148","name":"Dr Ventures","region":"West","qTarget":900000,"months":[{"label":"Apr-26","target":300000,"actual":0},{"label":"46143","target":300000,"actual":1},{"label":"46174","target":300000,"actual":1}]},{"code":"DIST-000153","name":"Yashwardhan Creations","region":"West","qTarget":1500000,"months":[{"label":"Apr-26","target":500000,"actual":0},{"label":"46143","target":500000,"actual":1},{"label":"46174","target":500000,"actual":1}]},{"code":"DIST-000076","name":"Harivansh Traders","region":"North","qTarget":2400000,"months":[{"label":"Apr-26","target":800000,"actual":271376},{"label":"46143","target":800000,"actual":1},{"label":"46174","target":800000,"actual":1}]},{"code":"DIST-000070","name":"JAGDAMBA ENTERPRISES","region":"West","qTarget":900000,"months":[{"label":"Apr-26","target":300000,"actual":0},{"label":"46143","target":300000,"actual":1},{"label":"46174","target":300000,"actual":1}]},{"code":"DIST-000121","name":"Yashika Agencies","region":"West","qTarget":1500000,"months":[{"label":"Apr-26","target":500000,"actual":458342},{"label":"46143","target":500000,"actual":1},{"label":"46174","target":500000,"actual":1}]},{"code":"DIST-000169","name":"Rk Sales","region":"West","qTarget":900000,"months":[{"label":"Apr-26","target":300000,"actual":0},{"label":"46143","target":300000,"actual":1},{"label":"46174","target":300000,"actual":1}]},{"code":"DIST-000064","name":"ARORA'S SHOPPY","region":"West","qTarget":1500000,"months":[{"label":"Apr-26","target":500000,"actual":128638},{"label":"46143","target":500000,"actual":1},{"label":"46174","target":500000,"actual":1}]},{"code":"DIST-000081","name":"GLAMZONE APPARELS PRIVATE LIMITED","region":"East","qTarget":2150000,"months":[{"label":"Apr-26","target":750000,"actual":436797},{"label":"46143","target":700000,"actual":1},{"label":"46174","target":700000,"actual":1}]},{"code":"DIST-000086","name":"Shree Mahalasa and Co","region":"West","qTarget":2150000,"months":[{"label":"Apr-26","target":750000,"actual":436797},{"label":"46143","target":700000,"actual":1},{"label":"46174","target":700000,"actual":1}]},{"code":"DIST-000148","name":"DR VENTURES","region":"West","qTarget":900000,"months":[{"label":"Apr-26","target":300000,"actual":6176},{"label":"46143","target":300000,"actual":1},{"label":"46174","target":300000,"actual":1}]}]};
+
+// ── RUNTIME ──
+var isAdmin=false, pinBuf='';
+var distributors=[];
+var curDist=null;
+var origActuals=[0,0,0];
+var INF=new Intl.NumberFormat('en-IN');
+function fmt(n){return 'Rs. '+INF.format(Math.round(isNaN(n)?0:n));}
+function fmtN(n){return INF.format(Math.round(isNaN(n)?0:n));}
+function fmtP(n){return (isNaN(n)?0:n).toFixed(1)+'%';}
+function flashGreen(id){var el=document.getElementById(id);if(!el)return;el.classList.add('af');setTimeout(function(){el.classList.remove('af');},2000);}
+
+// ── SLAB LOOKUP (NSV based — same pattern as FC findMonthSlab) ──
+// achievement% based lookup: 90%=0.5%, 100%=1%, 110%=1.5%
+function findAchSlab(pct){
+  var found=null,fi=-1;
+  for(var j=0;j<CFG.slabs.length;j++){if(pct>=CFG.slabs[j].pct){found=CFG.slabs[j];fi=j;}}
+  return {slab:found,idx:fi};
+}
+
+// ── CALC INCENTIVE FOR ONE MONTH (achievement % based) ──
+function calcMonth(target,actual){
+  if(!target||target<=0||isNaN(actual)||actual<0) return {inc:0,slab:null,idx:-1,pct:0,rate:0};
+  var pct=(actual/target)*100;
+  var r=findAchSlab(pct);
+  var inc=(r.slab&&actual>0)?actual*r.slab.rate:0;
+  return {inc:inc,slab:r.slab,idx:r.idx,pct:pct,rate:r.slab?r.slab.rate:0};
+}
+
+// ── MAIN CALC ──
+function calc(){
+  var m1=parseFloat(document.getElementById('v-m1').value)||0;
+  var m2=parseFloat(document.getElementById('v-m2').value)||0;
+  var m3=parseFloat(document.getElementById('v-m3').value)||0;
+  var q=m1+m2+m3;
+  document.getElementById('v-quarterly').value='Rs.'+fmtN(q);
+
+  // Monthly targets from distributor record
+  var t1=curDist?curDist.months[0].target:0;
+  var t2=curDist?curDist.months[1].target:0;
+  var t3=curDist?curDist.months[2].target:0;
+
+  // Quarterly target: admin-entered or auto-sum of monthly targets
+  var qTgt=parseFloat(document.getElementById('v-q-target').value)||0;
+  if(!qTgt&&(t1||t2||t3)) qTgt=t1+t2+t3; // fallback to sum of monthly targets
+
+  // Monthly incentives (each month vs its own target)
+  var r1=calcMonth(t1,m1), r2=calcMonth(t2,m2), r3=calcMonth(t3,m3);
+  var mTotalInc=r1.inc+r2.inc+r3.inc;
+
+  // Quarterly incentive (quarterly actual vs quarterly target, same slabs)
+  var rQ=calcMonth(qTgt,q);
+  var qInc=rQ.inc;
+
+  // Quarterly achievement % — now safe, rQ is defined
+  var qPctNum=qTgt>0?(q/qTgt*100):0;
+  document.getElementById('v-q-ach').value=qTgt>0?fmtP(qPctNum)+' ('+(rQ&&rQ.slab?'Slab: '+(rQ.slab.rate*100).toFixed(1)+'%':'Below 90%')+')'  :'Set target';
+
+  var totalInc=mTotalInc+qInc;
+
+  // Result summary
+  document.getElementById('rs-total').textContent=fmt(totalInc);
+  var bk=document.getElementById('rs-breakdown');
+  bk.innerHTML='';
+  var mLabels=curDist?curDist.months.map(function(m){return m.label;}):['M1','M2','M3'];
+  [[m1,r1,'green',mLabels[0]],[m2,r2,'blue',mLabels[1]],[m3,r3,'amber',mLabels[2]]].forEach(function(a){
+    if(a[0]>0) bk.innerHTML+='<div class="rs-part '+a[2]+'"><div class="rp-lbl">'+a[3]+' Monthly</div><div class="rp-val">'+fmt(a[1].inc)+'</div></div>';
+  });
+  if(qInc>0) bk.innerHTML+='<div class="rs-part blue"><div class="rp-lbl">Quarterly ('+qPctNum.toFixed(1)+'%)</div><div class="rp-val">'+fmt(qInc)+'</div></div>';
+  if(totalInc===0) bk.innerHTML='<div class="rs-part"><div class="rp-lbl">Status</div><div class="rp-val">Below 90% — no incentive</div></div>';
+
+  // Slab tracker grid
+  buildSlabTracker(m1,m2,m3,r1,r2,r3,rQ,q,qTgt,qPctNum);
+
+  // Progress bars — achievement % based
+  // Use avg achievement across months with targets
+  var validMonths=[[t1,m1],[t2,m2],[t3,m3]].filter(function(p){return p[0]>0;});
+  var avgPct=validMonths.length?validMonths.reduce(function(s,p){return s+p[1]/p[0]*100;},0)/validMonths.length:0;
+  var nextSlabPct=avgPct<90?90:avgPct<100?100:avgPct<110?110:-1;
+  var mp=nextSlabPct>0?Math.min((avgPct/nextSlabPct)*100,100):100;
+  document.getElementById('prog-m').style.width=Math.min(avgPct/110*100,100)+'%';
+  document.getElementById('prog-m').className='pbar-fill'+(avgPct>=110?' green':avgPct>=90?'':' ');
+  if(avgPct>=110){
+    document.getElementById('prog-m-pct').textContent='110%+ slab — Max incentive!';
+    document.getElementById('prog-m').className='pbar-fill green';
+  } else if(avgPct>=100){
+    document.getElementById('prog-m-pct').textContent=fmtP(avgPct)+' achieved · '+fmtP(110-avgPct)+' more to 110%';
+  } else if(avgPct>=90){
+    document.getElementById('prog-m-pct').textContent=fmtP(avgPct)+' achieved · '+fmtP(100-avgPct)+' more to 100%';
+  } else if(avgPct>0){
+    document.getElementById('prog-m-pct').textContent=fmtP(avgPct)+' achieved · '+fmtP(90-avgPct)+' more to 90%';
+  } else {
+    document.getElementById('prog-m-pct').textContent='Load a distributor record';
+  }
+  // Quarterly progress bar
+  var qBarPct=qTgt>0?Math.min((q/qTgt)*100,110):0;
+  document.getElementById('prog-q').style.width=Math.min(qBarPct,100)+'%';
+  document.getElementById('prog-q').className='pbar-fill'+(qBarPct>=110?' green':qBarPct>=100?'':' ');
+  if(qBarPct>=110) document.getElementById('prog-q').className='pbar-fill green';
+  document.getElementById('prog-q-pct').textContent=qTgt>0?fmtP(qPctNum)+' quarterly achievement'+(qInc>0?' · '+fmt(qInc):''):'Set quarterly target above';
+
+  // Nudge — show gap to next achievement slab
+  var nudge=document.getElementById('nudge');
+  if(avgPct>=110){
+    nudge.style.display='none';
+  } else if(avgPct>=100&&validMonths.length){
+    var needed=validMonths.reduce(function(s,p){return s+Math.max(0,p[0]*1.1-p[1]);},0);
+    nudge.style.display='block';
+    nudge.innerHTML='💡 <strong>Rs.'+fmtN(needed)+' more NSV</strong> across remaining months to reach 110% → 1.5% rate';
+  } else if(avgPct>=90&&validMonths.length){
+    var needed=validMonths.reduce(function(s,p){return s+Math.max(0,p[0]*1.0-p[1]);},0);
+    nudge.style.display='block';
+    nudge.innerHTML='💡 <strong>Rs.'+fmtN(needed)+' more NSV</strong> across remaining months to reach 100% → 1.0% rate';
+  } else if(validMonths.length){
+    var needed=validMonths.reduce(function(s,p){return s+Math.max(0,p[0]*0.9-p[1]);},0);
+    nudge.style.display='block';
+    nudge.innerHTML='💡 <strong>Rs.'+fmtN(needed)+' more NSV</strong> across remaining months to reach 90% minimum slab (0.5%)';
+  } else { nudge.style.display='none'; }
+
+  // Additional quarterly nudge if quarterly slab differs
+  if(qTgt>0&&qPctNum<110&&qPctNum>=0){
+    var qNudgeEl=document.getElementById('nudge-q');
+    var qGapTo=qPctNum<90?Math.ceil(qTgt*0.9-q):qPctNum<100?Math.ceil(qTgt*1.0-q):Math.ceil(qTgt*1.1-q);
+    var qNextLabel=qPctNum<90?'90% (0.5%)':qPctNum<100?'100% (1.0%)':'110% (1.5%)';
+    qNudgeEl.style.display='block';
+    qNudgeEl.innerHTML='📊 Quarterly: <strong>Rs.'+fmtN(qGapTo)+' more NSV</strong> to reach '+qNextLabel+' slab · current: '+fmtP(qPctNum);
+  } else if(document.getElementById('nudge-q')) {
+    document.getElementById('nudge-q').style.display='none';
+  }
+
+  // Mini trips — retailer qualification based
+  calcMiniTrips();
+}
+
+function buildSlabTracker(m1,m2,m3,r1,r2,r3,rQ,q,qTgt,qPctNum){
+  var grid=document.getElementById('slab-calc-grid');
+  var existing=grid.querySelectorAll('.sc-row');
+  for(var i=0;i<existing.length;i++) existing[i].parentNode.removeChild(existing[i]);
+
+  var t1=curDist?curDist.months[0].target:0;
+  var t2=curDist?curDist.months[1].target:0;
+  var t3=curDist?curDist.months[2].target:0;
+
+  function mCell(nsv,r,isActive,tgt){
+    if(!tgt||tgt<=0||!isActive) return '<span style="color:var(--dim)">—</span>';
+    if(nsv<=0) return '<span style="color:var(--dim);font-size:10px">—</span>';
+    return '<span class="sc-earned">'+fmt(r.inc)+'</span><br><span style="font-size:10px;color:var(--sub)">'+(nsv/tgt*100).toFixed(0)+'%</span>';
+  }
+
+  // 3 fixed rows: 90%, 100%, 110%
+  CFG.slabs.forEach(function(s,i){
+    var a1=r1.idx===i, a2=r2.idx===i, a3=r3.idx===i;
+    var aQ=rQ&&rQ.idx===i;
+    var anyMActive=a1||a2||a3;
+    var anyActive=anyMActive||aQ;
+    var row=document.createElement('div');
+    row.className='sc-row'+(anyActive?' active-slab':'');
+
+    var mTotal='<span style="color:var(--dim)">—</span>';
+    if(anyMActive){
+      var mt=(a1?r1.inc:0)+(a2?r2.inc:0)+(a3?r3.inc:0);
+      mTotal= mt>0?'<span class="sc-earned">'+fmt(mt)+'</span>':'<span style="color:var(--dim);font-size:10px">Enter NSV</span>';
+    }
+
+    var qCell='<span style="color:var(--dim)">—</span>';
+    if(aQ&&qTgt>0){
+      qCell=q>0?'<span class="sc-q-earned">'+fmt(rQ.inc)+'</span><br><span style="font-size:10px;color:var(--sub)">'+qPctNum.toFixed(0)+'%</span>':'<span style="color:var(--dim);font-size:10px">—</span>';
+    }
+
+    var totalCell='<span style="color:var(--dim)">—</span>';
+    var grandTotal=(anyMActive?(a1?r1.inc:0)+(a2?r2.inc:0)+(a3?r3.inc:0):0)+(aQ&&rQ?rQ.inc:0);
+    if(grandTotal>0) totalCell='<span class="sc-earned" style="font-size:14px">'+fmt(grandTotal)+'</span>';
+
+    row.innerHTML=
+      '<div class="sc-val">'+s.label+'<br><span style="font-weight:900;font-size:12px;color:'+(s.rate>=0.015?'var(--blue)':s.rate>=0.01?'var(--green)':'var(--amber)')+'">'+( s.rate*100).toFixed(1)+'%</span></div>'+
+      '<div>'+mCell(m1,r1,a1,t1)+'</div>'+
+      '<div>'+mCell(m2,r2,a2,t2)+'</div>'+
+      '<div>'+mCell(m3,r3,a3,t3)+'</div>'+
+      '<div>'+qCell+'</div>'+
+      '<div>'+totalCell+'</div>';
+    grid.appendChild(row);
+  });
+}
+
+function calcMiniTrips(){
+  // Trips are based on retailer qualification count, not NSV
+  // Read from trip retailer counter inputs
+  var tR=parseInt(document.getElementById('trip-retailers-turkey').value)||0;
+  var sR=parseInt(document.getElementById('trip-retailers-swiss').value)||0;
+  var tReq=CFG.trip.turkey, sReq=CFG.trip.swiss; // min qualifying retailers
+  var tP=Math.min((tR/tReq)*100,100), sP=Math.min((sR/sReq)*100,100);
+  document.getElementById('mini-turkey-fill').style.width=tP+'%';
+  document.getElementById('mini-turkey-pct').textContent=tR+' of '+tReq+' retailers qualified';
+  document.getElementById('mini-turkey-ok').style.display=tR>=tReq?'block':'none';
+  document.getElementById('mini-swiss-fill').style.width=sP+'%';
+  document.getElementById('mini-swiss-pct').textContent=sR+' of '+sReq+' retailers qualified';
+  document.getElementById('mini-swiss-ok').style.display=sR>=sReq?'block':'none';
+}
+
+function calcTripPage(){
+  var tR=parseInt(document.getElementById('trip-retailers-turkey').value)||0;
+  var sR=parseInt(document.getElementById('trip-retailers-swiss').value)||0;
+  var tReq=CFG.trip.turkey, sReq=CFG.trip.swiss;
+  var tP=Math.min((tR/tReq)*100,100), sP=Math.min((sR/sReq)*100,100);
+
+  // Turkey
+  document.getElementById('trip-turkey-pct').textContent=tR+' of '+tReq+' retailers qualified';
+  document.getElementById('trip-turkey-fill').style.width=tP+'%';
+  document.getElementById('trip-turkey-fill').className='pbar-fill'+(tR>=tReq?' green':'');
+  document.getElementById('trip-turkey-ach').textContent=tR+' retailers';
+  document.getElementById('trip-turkey-gap').textContent=tR>=tReq?'✅ Qualified!':(tReq-tR)+' more retailers needed';
+  document.getElementById('trip-turkey-status').innerHTML=tR>=tReq?
+    '<span style="font-size:14px;font-weight:800;color:var(--green)">🎉 Turkey Trip Unlocked! All '+tR+' retailers qualify.</span>':
+    '<span style="font-size:12px;font-weight:700;color:var(--sub)">'+(tReq-tR)+' more qualifying retailers needed from your geography</span>';
+
+  // Switzerland
+  document.getElementById('trip-swiss-pct').textContent=sR+' of '+sReq+' retailers qualified';
+  document.getElementById('trip-swiss-fill').style.width=sP+'%';
+  document.getElementById('trip-swiss-fill').className='pbar-fill'+(sR>=sReq?' green':'');
+  document.getElementById('trip-swiss-ach').textContent=sR+' retailers';
+  document.getElementById('trip-swiss-gap').textContent=sR>=sReq?'✅ Qualified!':(sReq-sR)+' more retailers needed';
+  document.getElementById('trip-swiss-status').innerHTML=sR>=sReq?
+    '<span style="font-size:14px;font-weight:800;color:var(--green)">🎉 Switzerland Trip Unlocked! All '+sR+' retailers qualify.</span>':
+    '<span style="font-size:12px;font-weight:700;color:var(--sub)">'+(sReq-sR)+' more qualifying retailers needed from your geography</span>';
+
+  // Sync mini trip tracker
+  calcMiniTrips();
+}
+
+// ── RETAILER TRIP DATA ──
+var tripRetailers = []; // uploaded retailer rows
+
+function handleTripDrop(e){
+  e.preventDefault();
+  document.getElementById('trip-drop-area').classList.remove('drag');
+  var f=e.dataTransfer.files[0]; if(!f)return; processTripFile(f);
+}
+function handleTripUpload(inp){ var f=inp.files[0]; if(!f)return; processTripFile(f); inp.value=''; }
+
+function processTripFile(file){
+  var st=document.getElementById('trip-upload-status');
+  st.textContent='Reading '+file.name+'...'; st.style.color='var(--sub)';
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',raw:true});
+      var allRows=[];
+      wb.SheetNames.forEach(function(sn){
+        if(sn.toLowerCase().replace(/[^a-z]/g,'')!=='readme'){
+          var rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{defval:'',raw:true});
+          if(rows.length) allRows=allRows.concat(rows);
+        }
+      });
+      if(!allRows.length){ st.textContent='No data found.'; st.style.color='var(--red)'; return; }
+
+      function gv(row,cands){
+        for(var i=0;i<cands.length;i++){ if(row[cands[i]]!==undefined&&row[cands[i]]!=='') return row[cands[i]]; }
+        var keys=Object.keys(row);
+        for(var i=0;i<cands.length;i++){
+          var cl=cands[i].toLowerCase().replace(/[^a-z0-9]/g,'').substring(0,6);
+          for(var j=0;j<keys.length;j++){ if(keys[j].toLowerCase().replace(/[^a-z0-9]/g,'').indexOf(cl)>-1&&row[keys[j]]!==undefined&&row[keys[j]]!=='') return row[keys[j]]; }
+        }
+        return '';
+      }
+
+      var parsed=[];
+      allRows.forEach(function(row){
+        var name=String(gv(row,['Retailer Name','Name','Outlet Name'])||'').trim();
+        if(!name||name==='undefined') return;
+        var sixM   = parseFloat(gv(row,['6M Purchase','6 Month Purchase','6M Purchase (Rs.)','Six Month','6month']))||0;
+        var annual = parseFloat(gv(row,['Annual Purchase','Annual','Annual Purchase (Rs.)','Yearly']))||0;
+        var distCode= String(gv(row,['Distributor Code','Dist Code','Distributor','DistCode'])||'').trim();
+        var region  = String(gv(row,['Region','Zone','Geography'])||'').trim();
+        // Turkey qualification: 6M purchase >= CFG.trip.turkey threshold (Rs.9L default)
+        // Switzerland: annual >= CFG.trip.swiss threshold (Rs.18L default)
+        // Note: CFG.trip.turkey/swiss now stores retailer COUNT threshold (6),
+        // but purchase thresholds are fixed in the scheme
+        var tThr=900000, sThr=1800000; // purchase thresholds from FC scheme
+        parsed.push({
+          name:     name,
+          code:     String(gv(row,['Outlet Code','Code','Retailer Code'])||'').trim(),
+          distCode: distCode,
+          region:   region,
+          sixM:     sixM,
+          annual:   annual,
+          turkeyQual: sixM >= tThr,
+          swissQual:  annual >= sThr
+        });
+      });
+
+      if(!parsed.length){ st.textContent='No valid rows found. Check columns.'; st.style.color='var(--red)'; return; }
+      tripRetailers=parsed;
+      st.textContent='✓ '+parsed.length+' retailers loaded from '+file.name;
+      st.style.color='var(--green)';
+
+      // Populate distributor filter
+      var dists={};
+      parsed.forEach(function(r){ if(r.distCode) dists[r.distCode]=1; });
+      var dSel=document.getElementById('trip-dist-sel');
+      dSel.innerHTML='<option value="">All Distributors (Geography-wide)</option>';
+      Object.keys(dists).sort().forEach(function(d){
+        var o=document.createElement('option'); o.value=d; o.textContent=d; dSel.appendChild(o);
+      });
+      document.getElementById('trip-dist-filter').style.display='block';
+
+      // Show auto panels, hide manual
+      document.getElementById('trip-turkey-manual').style.display='none';
+      document.getElementById('trip-swiss-manual').style.display='none';
+      document.getElementById('trip-turkey-auto').style.display='block';
+      document.getElementById('trip-swiss-auto').style.display='block';
+      document.getElementById('trip-retailer-table-wrap').style.display='block';
+
+      applyTripDistFilter();
+    }catch(err){ st.textContent='Error: '+err.message; st.style.color='var(--red)'; }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function applyTripDistFilter(){
+  var distF=document.getElementById('trip-dist-sel').value;
+  var filtered=distF ? tripRetailers.filter(function(r){ return r.distCode===distF; }) : tripRetailers;
+
+  var tCount=0, sCount=0;
+  var tNames=[], sNames=[];
+  filtered.forEach(function(r){
+    if(r.turkeyQual){ tCount++; tNames.push(r.name); }
+    if(r.swissQual){  sCount++; sNames.push(r.name); }
+  });
+
+  var tReq=CFG.trip.turkey, sReq=CFG.trip.swiss;
+
+  // Update inputs so calcTripPage works
+  document.getElementById('trip-retailers-turkey').value=tCount;
+  document.getElementById('trip-retailers-swiss').value=sCount;
+
+  // Retailer name lists
+  var maxShow=8;
+  document.getElementById('trip-turkey-retailer-list').innerHTML=
+    tCount>0
+      ? tNames.slice(0,maxShow).map(function(n){ return '✅ '+n; }).join(' · ')+(tNames.length>maxShow?' + '+(tNames.length-maxShow)+' more':'')
+      : 'No retailers qualify yet (need 6M purchase ≥ Rs.9,00,000)';
+  document.getElementById('trip-swiss-retailer-list').innerHTML=
+    sCount>0
+      ? sNames.slice(0,maxShow).map(function(n){ return '✅ '+n; }).join(' · ')+(sNames.length>maxShow?' + '+(sNames.length-maxShow)+' more':'')
+      : 'No retailers qualify yet (need Annual purchase ≥ Rs.18,00,000)';
+
+  // Render detail table
+  var tbody=document.getElementById('trip-retailer-tbody');
+  tbody.innerHTML='';
+  filtered.forEach(function(r){
+    var tr=document.createElement('tr');
+    tr.innerHTML=
+      '<td style="padding:8px 10px;font-weight:800;border-bottom:1px solid var(--bg)">'+r.name+'</td>'+
+      '<td style="padding:8px 10px;border-bottom:1px solid var(--bg);color:var(--dim);font-size:11px">'+r.code+'</td>'+
+      '<td style="padding:8px 10px;border-bottom:1px solid var(--bg)">'+r.distCode+'</td>'+
+      '<td style="padding:8px 10px;border-bottom:1px solid var(--bg);font-weight:700">Rs.'+fmtN(r.sixM)+'</td>'+
+      '<td style="padding:8px 10px;border-bottom:1px solid var(--bg);font-weight:900;color:'+(r.turkeyQual?'var(--green)':'var(--red)')+'">'+
+        (r.turkeyQual?'✅ Qualifies':'✗ Below threshold')+'</td>'+
+      '<td style="padding:8px 10px;border-bottom:1px solid var(--bg);font-weight:700">Rs.'+fmtN(r.annual)+'</td>'+
+      '<td style="padding:8px 10px;border-bottom:1px solid var(--bg);font-weight:900;color:'+(r.swissQual?'var(--green)':'var(--red)')+'">'+
+        (r.swissQual?'✅ Qualifies':'✗ Below threshold')+'</td>';
+    tbody.appendChild(tr);
+  });
+  document.getElementById('trip-tbl-count').textContent=filtered.length+' retailers';
+
+  calcTripPage();
+}
+
+function downloadRetailerTemplate(){
+  var wb=XLSX.utils.book_new();
+
+  // Main data sheet
+  var ws=XLSX.utils.aoa_to_sheet([
+    ['Retailer Name','Outlet Code','Distributor Code','Region / Geography','6M Purchase (Rs.)','Annual Purchase (Rs.)'],
+    ['Sample Retailer A','RC001','DIST001','North',950000,2100000],
+    ['Sample Retailer B','RC002','DIST001','North',750000,1650000],
+    ['Sample Retailer C','RC003','DIST002','North',1200000,2400000],
+    ['Sample Retailer D','RC004','DIST002','South',820000,1900000],
+    ['Sample Retailer E','RC005','DIST003','South',450000,1000000],
+    ['Sample Retailer F','RC006','DIST003','East',1050000,2250000],
+  ]);
+
+  // Column widths
+  ws['!cols']=[{wch:22},{wch:12},{wch:16},{wch:18},{wch:20},{wch:20}];
+
+  XLSX.utils.book_append_sheet(wb,ws,'Retailer Data');
+
+  // Readme sheet
+  var readme=XLSX.utils.aoa_to_sheet([
+    ['RETAILER TRIP QUALIFICATION — EXCEL FORMAT GUIDE'],
+    [''],
+    ['This file is uploaded to the Distributor Incentive Hub → Trips tab.'],
+    ['The portal auto-calculates which retailers qualify for Turkey and Switzerland trips.'],
+    [''],
+    ['COLUMNS REQUIRED:'],
+    ['Retailer Name','Required. Name of the retailer / outlet.'],
+    ['Outlet Code','Optional. Unique code for the outlet.'],
+    ['Distributor Code','Required. Code linking the retailer to their distributor.'],
+    ['Region / Geography','Optional. Used for filtering.'],
+    ['6M Purchase (Rs.)','Required. Retailer total purchase in the 6-month period (for Turkey trip).'],
+    ['Annual Purchase (Rs.)','Required. Retailer total annual purchase (for Switzerland trip).'],
+    [''],
+    ['QUALIFICATION THRESHOLDS (from Friends Connection scheme):'],
+    ['🇹🇷 Turkey Trip (4N/5D)','6-Month Purchase','≥ Rs.9,00,000'],
+    ['🇨🇭 Switzerland Trip (5N/6D)','Annual Purchase','≥ Rs.18,00,000'],
+    [''],
+    ['DISTRIBUTOR QUALIFICATION:'],
+    ['A distributor qualifies for a trip when 6 or more retailers in their','assigned geography meet the purchase threshold above.'],
+    [''],
+    ['NOTES:'],
+    ['- Multiple sheets are supported; all non-README sheets will be read.'],
+    ['- Column names are flexible — partial matches work (e.g. "6M" matches "6M Purchase").'],
+    ['- One row per retailer per period.'],
+  ]);
+  readme['!cols']=[{wch:30},{wch:25},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,readme,'README');
+
+  XLSX.writeFile(wb,'Retailer_Trip_Qualification_Template.xlsx');
+}
+
+// ── DISTRIBUTOR SELECTOR ──
+function fillDistSel(){
+  var sel=document.getElementById('sel-dist');
+  sel.innerHTML='<option value="">— Choose distributor —</option>';
+  distributors.forEach(function(d,i){
+    var o=document.createElement('option');o.value=i;
+    o.textContent=(d.code?d.code+' · ':'')+d.name+(d.region?' ('+d.region+')':'');
+    sel.appendChild(o);
+  });
+}
+
+function applyDist(){
+  var idx=parseInt(document.getElementById('sel-dist').value);
+  if(isNaN(idx)||idx<0){curDist=null;return;}
+  curDist=distributors[idx];
+  origActuals=curDist.months.map(function(m){return m.actual;});
+
+  // Set month labels
+  curDist.months.forEach(function(m,i){
+    var n=i+1;
+    document.getElementById('lbl-m'+n).textContent=(m.label||'Month '+n)+' NSV (Rs.)';
+    var inp=document.getElementById('v-m'+n);
+    inp.value=m.actual||0;
+    inp.classList.remove('ov');
+    inp.classList.add('af');
+    setTimeout(function(){inp.classList.remove('af');},2000);
+    var tag=document.getElementById('tag-m'+n);
+    tag.textContent='● Admin data · Target: Rs.'+fmtN(m.target);
+    tag.style.color='var(--green)';
+    tag.style.display='block';
+  });
+
+  // Chips
+  document.getElementById('chips-dist').innerHTML=
+    (curDist.code?'<span class="chip cb">'+curDist.code+'</span>':'')+
+    (curDist.region?'<span class="chip cg">'+curDist.region+'</span>':'')+
+    curDist.months.map(function(m,i){
+      return '<span class="chip ca">'+(m.label||'M'+(i+1))+': Act Rs.'+fmtN(m.actual)+(m.target?' / Tgt Rs.'+fmtN(m.target):'')+'</span>';
+    }).join('');
+
+  document.getElementById('ov-callout').style.display='none';
+
+  // Set quarterly target: use explicit qTarget if present, else sum of monthly targets
+  var qT=curDist.qTarget||(curDist.months.reduce(function(s,m){return s+(m.target||0);},0));
+  var qTgtInp=document.getElementById('v-q-target');
+  qTgtInp.value=qT||0;
+  var qTgtTag=document.getElementById('tag-qtgt');
+  var qTgtTagSpan=document.getElementById('q-tgt-tag');
+  qTgtTag.textContent='● Auto-sum of monthly targets: Rs.'+fmtN(qT);
+  qTgtTag.style.color='var(--green)';
+  qTgtTag.style.display='block';
+  qTgtTagSpan.style.display='inline';
+
+  // Trip fields — retailer count (distributor enters manually)
+
+  calc();
+  calcTripPage();
+}
+
+// Override detection
+function onNsvChange(n){
+  var val=parseFloat(document.getElementById('v-m'+n).value);
+  var inp=document.getElementById('v-m'+n);
+  var tag=document.getElementById('tag-m'+n);
+  if(curDist){
+    var isOv=!isNaN(val)&&val!==origActuals[n-1];
+    inp.className=isOv?'ov':'';
+    if(tag.style.display!=='none'){
+      tag.textContent=isOv?'✎ Override · Admin: Rs.'+fmtN(origActuals[n-1])+'  Target: Rs.'+fmtN(curDist.months[n-1].target):'● Admin data · Target: Rs.'+fmtN(curDist.months[n-1].target);
+      tag.style.color=isOv?'var(--amber)':'var(--green)';
+    }
+    var anyOv=[1,2,3].some(function(mn){var v=parseFloat(document.getElementById('v-m'+mn).value);return !isNaN(v)&&v!==origActuals[mn-1];});
+    document.getElementById('ov-callout').style.display=anyOv?'block':'none';
+  }
+  calc();
+}
+
+function resetToAdmin(){
+  if(!curDist)return;
+  curDist.months.forEach(function(m,i){
+    var n=i+1;
+    document.getElementById('v-m'+n).value=m.actual||0;
+    document.getElementById('v-m'+n).className='';
+    var tag=document.getElementById('tag-m'+n);
+    tag.textContent='● Admin data · Target: Rs.'+fmtN(m.target);
+    tag.style.color='var(--green)';
+  });
+  document.getElementById('ov-callout').style.display='none';
+  calc();
+}
+
+// ── EXCEL UPLOAD ──
+function handleDrop(e){
+  e.preventDefault();document.getElementById('drop-area').classList.remove('drag');
+  var f=e.dataTransfer.files[0];if(!f)return;processFile(f);
+}
+function handleMonthlyUpload(inp){var f=inp.files[0];if(!f)return;processFile(f);inp.value='';}
+function handleUpload(inp){var f=inp.files[0];if(!f)return;processFile(f);inp.value='';}
+
+function processFile(file){
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',raw:true});
+      var allRows=[];
+      wb.SheetNames.forEach(function(sn){
+        if(sn.toLowerCase().replace(/[^a-z]/g,'')!=='readme'){
+          var rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{defval:'',raw:true});
+          if(rows.length) allRows=allRows.concat(rows);
+        }
+      });
+      if(!allRows.length){alert('No data found in file.');return;}
+
+      function gv(row,cands){
+        for(var i=0;i<cands.length;i++){if(row[cands[i]]!==undefined&&row[cands[i]]!=='')return row[cands[i]];}
+        var keys=Object.keys(row);
+        for(var i=0;i<cands.length;i++){
+          var cl=cands[i].toLowerCase().replace(/[^a-z]/g,'').substring(0,5);
+          for(var j=0;j<keys.length;j++){if(keys[j].toLowerCase().replace(/[^a-z]/g,'').indexOf(cl)>-1&&row[keys[j]]!==undefined&&row[keys[j]]!=='')return row[keys[j]];}
+        }
+        return '';
+      }
+
+      var parsed=[];
+      allRows.forEach(function(row){
+        var name=String(gv(row,['Distributor Name','Name'])||'').trim();
+        if(!name||name==='undefined')return;
+        var months=[1,2,3].map(function(n){
+          return {
+            label: String(gv(row,['M'+n+' Label','M'+n+'Label','Month '+n+' Label','Month'+n])||'M'+n).trim(),
+            target: parseFloat(gv(row,['M'+n+' Target','M'+n+'Target','Month '+n+' Target']))||0,
+            actual: parseFloat(gv(row,['M'+n+' Actual','M'+n+'Actual','Month '+n+' Actual','M'+n+' Till Date','Till Date NSV']))||0
+          };
+        });
+        var qTarget=parseFloat(gv(row,['Quarterly Target','Q Target','QTarget','Quarterly NSV Target']))||0;
+        parsed.push({
+          code:     String(gv(row,['Distributor Code','Code'])||'').trim(),
+          name:     name,
+          region:   String(gv(row,['State / Region','Region','Zone'])||'').trim(),
+          qTarget:  qTarget,
+          months:   months
+        });
+      });
+
+      if(!parsed.length){alert('No valid distributor rows found. Check column names match template.');return;}
+      distributors=parsed;
+      saveToLS('dist_v1',distributors);
+      fillDistSel();
+      buildMonthFilter();
+      renderMonthlyTable();
+      var st=document.getElementById('up-st');
+      if(st){st.textContent='✓ '+parsed.length+' distributors loaded from '+file.name;st.className='up-st ok';}
+      goTab('monthly');
+    }catch(err){
+      var st=document.getElementById('up-st');
+      if(st){st.textContent='Error: '+err.message;st.className='up-st err';}
+      alert('Error reading file: '+err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── MONTHLY TABLE ──
+function buildMonthFilter(){
+  var months={};
+  distributors.forEach(function(d){d.months.forEach(function(m){if(m.label)months[m.label]=1;});});
+  var mf=document.getElementById('month-filter');
+  mf.innerHTML='<option value="">All Months</option>';
+  Object.keys(months).sort().forEach(function(mk){var o=document.createElement('option');o.value=mk;o.textContent=mk;mf.appendChild(o);});
+  document.getElementById('month-filter-wrap').style.display=Object.keys(months).length?'block':'none';
+}
+
+function renderMonthlyTable(){
+  var mf=document.getElementById('month-filter').value;
+  var rows=[];
+  distributors.forEach(function(d){
+    d.months.forEach(function(m){
+      if(mf&&m.label!==mf)return;
+      var r=calcMonth(m.target,m.actual);
+      var pct=m.target>0?(m.actual/m.target*100):0;
+      rows.push({name:d.name,code:d.code,region:d.region,label:m.label,target:m.target,actual:m.actual,pct:pct,rate:r.rate,inc:r.inc});
+    });
+  });
+  var tbody=document.getElementById('mdata-body');
+  tbody.innerHTML='';
+  var totT=0,totA=0,totI=0;
+  rows.forEach(function(r){
+    totT+=r.target;totA+=r.actual;totI+=r.inc;
+    var pc=r.pct>=110?'var(--blue)':r.pct>=100?'var(--green)':r.pct>=90?'var(--amber)':'var(--red)';
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td style="font-weight:800">'+r.name+(r.code?'<br><span style="font-size:10px;color:var(--dim)">'+r.code+'</span>':'')+'</td>'+
+      '<td>'+(r.region||'—')+'</td>'+
+      '<td>'+(r.label||'—')+'</td>'+
+      '<td>Rs.'+fmtN(r.target)+'</td>'+
+      '<td>Rs.'+fmtN(r.actual)+'</td>'+
+      '<td style="font-weight:800;color:'+pc+'">'+r.pct.toFixed(1)+'%</td>'+
+      '<td style="font-weight:800;color:var(--green)">'+(r.rate?(r.rate*100).toFixed(1)+'%':'—')+'</td>'+
+      '<td class="tbl-earn">'+fmt(r.inc)+'</td>';
+    tbody.appendChild(tr);
+  });
+  document.getElementById('mdata-wrap').style.display=rows.length?'block':'none';
+  document.getElementById('mdata-empty').style.display=rows.length?'none':'block';
+  if(rows.length){
+    document.getElementById('mdata-summary').style.display='block';
+    document.getElementById('ms-target').textContent=fmt(totT);
+    document.getElementById('ms-actual').textContent=fmt(totA);
+    document.getElementById('ms-ach').textContent=totT>0?fmtP(totA/totT*100):'—';
+    document.getElementById('ms-total').textContent=fmt(totI);
+  } else { document.getElementById('mdata-summary').style.display='none'; }
+}
+
+// ── TEMPLATE DOWNLOAD ──
+function downloadTemplate(){
+  var wb=XLSX.utils.book_new();
+  var ws=XLSX.utils.aoa_to_sheet([
+    ['Distributor Code','Distributor Name','State / Region','Quarterly Target',
+     'M1 Label','M1 Target','M1 Actual',
+     'M2 Label','M2 Target','M2 Actual',
+     'M3 Label','M3 Target','M3 Actual'],
+    ['DIST001','Sample Distributor','North',2400000,
+     'Jan-26',800000,720000,
+     'Feb-26',800000,850000,
+     'Mar-26',800000,640000]
+  ]);
+  XLSX.utils.book_append_sheet(wb,ws,'Distributor Data');
+  XLSX.writeFile(wb,'Dist_Incentive_Template.xlsx');
+}
+
+// ── SCHEME TABLES ──
+function buildSchemeTables(){
+  var mb=document.getElementById('m-slab-body');mb.innerHTML='';
+  CFG.slabs.forEach(function(s){
+    var rateColor=s.rate>=0.015?'var(--blue)':s.rate>=0.01?'var(--green)':'var(--amber)';
+    var tr=document.createElement('tr');
+    tr.style.borderTop='1px solid var(--bg)';
+    tr.innerHTML='<td style="padding:9px 10px;font-weight:800">'+s.label+'</td>'+
+      '<td style="padding:9px 10px;font-weight:900;color:'+rateColor+'">'+(s.rate*100).toFixed(1)+'%</td>'+
+      '<td style="padding:9px 10px;font-weight:700;color:var(--sub)">Monthly actual NSV</td>'+
+      '<td style="padding:9px 10px;font-weight:700;color:'+rateColor+'">'+(s.rate*100).toFixed(1)+'%</td>'+
+      '<td style="padding:9px 10px;font-weight:700;color:var(--sub)">Quarterly actual NSV</td>';
+    mb.appendChild(tr);
+  });
+  document.getElementById('sch-turkey').textContent='Rs.9,00,000';
+  document.getElementById('sch-swiss').textContent='Rs.18,00,000';
+  document.getElementById('mini-turkey-target').textContent='6-Month ≥ Rs.9,00,000';
+  document.getElementById('mini-swiss-target').textContent='Annual ≥ Rs.18,00,000';
+  
+  
+}
+
+// ── SLAB EDITOR ──
+function buildSlabEditor(){
+  var c=document.getElementById('slab-editor');c.innerHTML='';
+  // Fixed 3-slab structure — only rates are editable; % thresholds are structural
+  CFG.slabs.forEach(function(s,i){
+    var rateColor=s.rate>=0.015?'#6C63FF':s.rate>=0.01?'#00C896':'#FF9F1C';
+    var div=document.createElement('div');
+    div.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;padding:12px;background:var(--bg);border-radius:var(--rs);border-left:4px solid '+rateColor;
+    div.innerHTML='<div class="afield"><label>Achievement Slab</label>'+
+      '<div style="background:#fff;border:1.5px solid #1E1035;border-radius:var(--rs);padding:9px 12px;font-size:14px;font-weight:800;color:var(--text)">'+s.label+'</div></div>'+
+      '<div class="afield"><label>Rate (%)</label>'+
+      '<input type="number" step="0.01" id="se-rate-'+i+'" value="'+(s.rate*100).toFixed(2)+'"></div>';
+    c.appendChild(div);
+  });
+}
+function readSlabEditor(){
+  // Only rates are editable; pct and label are fixed
+  CFG.slabs.forEach(function(s,i){
+    var rate=(parseFloat(document.getElementById('se-rate-'+i).value)||0)/100;
+    CFG.slabs[i].rate=rate;
+  });
+}
+function addSlab(){alert('The 3-slab structure (90%/100%/110%) is fixed. You can only edit the incentive rates.');}
+function removeSlab(){alert('The 3-slab structure (90%/100%/110%) is fixed. You can only edit the incentive rates.');}
+
+// ── LOCAL STORAGE ──
+function saveToLS(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function loadFromLS(k){try{var r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch(e){return null;}}
+
+// ── ADMIN PIN ──
+function toggleAdmin(){if(isAdmin){logoutAdmin();}else{openPin();}}
+function openPin(){pinBuf='';updateDots();document.getElementById('pin-err').textContent='';document.getElementById('pin-modal').classList.remove('hidden');}
+function closePin(){document.getElementById('pin-modal').classList.add('hidden');pinBuf='';updateDots();}
+function pinKey(k){if(pinBuf.length>=4)return;pinBuf+=k;updateDots();if(pinBuf.length===4)setTimeout(checkPin,120);}
+function pinDel(){pinBuf=pinBuf.slice(0,-1);updateDots();}
+function updateDots(){for(var i=0;i<4;i++){var el=document.getElementById('pd'+i);if(i<pinBuf.length)el.classList.add('filled');else el.classList.remove('filled');}}
+function checkPin(){
+  if(pinBuf===CFG.pin){closePin();activateAdmin();}
+  else{document.getElementById('pin-err').textContent='Incorrect PIN.';pinBuf='';updateDots();}
+}
+function activateAdmin(){
+  isAdmin=true;
+  document.getElementById('adminbar').classList.add('show');
+  document.getElementById('upbar').classList.add('show');
+  document.getElementById('admin-tab').style.display='flex';
+  document.getElementById('monthly-tab').style.display='';
+  document.getElementById('admin-btn').textContent='🔓';
+  document.getElementById('tabs').className='tabs t2';
+  document.getElementById('cfg-turkey').value=CFG.trip.turkey;
+  document.getElementById('cfg-swiss').value=CFG.trip.swiss;
+  buildSlabEditor();
+}
+function logoutAdmin(){
+  isAdmin=false;
+  document.getElementById('adminbar').classList.remove('show');
+  document.getElementById('upbar').classList.remove('show');
+  document.getElementById('admin-tab').style.display='none';
+  document.getElementById('monthly-tab').style.display='none';
+  document.getElementById('admin-btn').textContent='⚙';
+  document.getElementById('tabs').className='tabs t1';
+  goTab('calculator');
+}
+
+// ── SAVE & PUBLISH ──
+function saveSettings(){
+  var p1=document.getElementById('cfg-pin1').value.trim();
+  var p2=document.getElementById('cfg-pin2').value.trim();
+  var pm=document.getElementById('pin-msg');
+  if(p1){if(!/^\d{4}$/.test(p1)){pm.style.color='var(--red)';pm.textContent='PIN must be 4 digits.';return;}if(p1!==p2){pm.style.color='var(--red)';pm.textContent='PINs do not match.';return;}CFG.pin=p1;pm.style.color='var(--green)';pm.textContent='PIN updated.';}
+  readSlabEditor();
+  CFG.trip.turkey=parseFloat(document.getElementById('cfg-turkey').value)||900000;
+  CFG.trip.swiss=parseFloat(document.getElementById('cfg-swiss').value)||1800000;
+  CFG.lastUpdated=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  buildSchemeTables();
+
+  var src=document.documentElement.outerHTML;
+  src=src.replace(/\/\/ ── CONFIG ──\nvar CFG = \{[\s\S]*?\n\};/,'// ── CONFIG ──\nvar CFG = '+JSON.stringify(CFG,null,2)+';');
+  src=src.replace(/\/\/ ── EMBEDDED ──\nvar EMBEDDED = \{[\s\S]*?\};/,'// ── EMBEDDED ──\nvar EMBEDDED = '+JSON.stringify({distributors:distributors})+';');
+  src=src.replace(/class="adminbar"/g,'class="adminbar"');
+  src=src.replace(/class="upbar"/g,'class="upbar"');
+  src=src.replace(/class="tabs t1"/g,'class="tabs t1"');
+  src=src.replace(/class="tab"/g,'class="tab"');
+  src=src.replace(/(<button class="tab" onclick="goTab\('calculator')/,'<button class="tab" onclick="goTab(\'calculator\'');
+  src=src.replace(/class="sec"/g,'class="sec"');
+  src=src.replace('id="sec-calculator" class="sec active"','id="sec-calculator" class="sec"');
+  src=src.replace(/id="admin-tab"[^>]*style="[^"]*"/,'id="admin-tab" onclick="goTab(\'admin-settings\',this)" style="display:none;color:var(--purple)"');
+  src=src.replace(/id="admin-btn"[^>]*>🔓/,'id="admin-btn" onclick="toggleAdmin()">⚙');
+  src=src.replace('class="ov-callout" id="ov-callout"','class="ov-callout" id="ov-callout" style="display:none"');
+
+  var blob=new Blob([src],{type:'text/html;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='DistIncentive_'+CFG.lastUpdated.replace(/ /g,'_')+'.html';
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(a.href);},1000);
+  showToast();
+}
+
+// ── TABS ──
+function goTab(id,btn){
+  document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('sec-'+id).classList.add('active');
+  if(btn){btn.classList.add('active');}else{
+    document.querySelectorAll('.tab').forEach(function(t){if((t.getAttribute('onclick')||'').indexOf("'"+id+"'")>-1)t.classList.add('active');});
+  }
+  setTimeout(function(){if(id==='calculator')calc();else if(id==='trips')calcTripPage();},30);
+}
+
+// ── TOAST ──
+function showToast(){var t=document.getElementById('toast');t.style.display='block';setTimeout(function(){t.style.display='none';},2200);}
+
+// ── INIT ──
+window.addEventListener('load',function(){
+  buildSchemeTables();
+  var stored=loadFromLS('dist_v1');
+  distributors=(stored&&stored.length)?stored:(EMBEDDED.distributors.length?EMBEDDED.distributors:[]);
+  if(distributors.length){fillDistSel();buildMonthFilter();renderMonthlyTable();}
+  calc();
+  if(CFG.lastUpdated)document.getElementById('vstamp').textContent='Distributor Incentive Portal · Updated '+CFG.lastUpdated;
+});
+</script>
+
+
+</body></html>
