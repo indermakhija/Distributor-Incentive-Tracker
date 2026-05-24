@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0086)file:///C:/Users/Inderpal%20S%20Makhija/Downloads/distributor_incentive_hub%20(3).html -->
+<!-- saved from url=(0086)file:///C:/Users/Inderpal%20S%20Makhija/Downloads/distributor_incentive_hub%20(5).html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
@@ -2447,7 +2447,7 @@ function fillDistSel(){
 
 function applyDist(){
   var code=document.getElementById('sel-dist').value;
-  if(isNaN(idx)||idx<0){curDist=null;return;}
+  if(!code){curDist=null;return;}
   curDist=distributors.find(function(d){return d.code===code;}); if(!curDist) return;
   origActuals=curDist.months.map(function(m){return m.actual;});
 
