@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0086)file:///C:/Users/Inderpal%20S%20Makhija/Downloads/distributor_incentive_hub%20(5).html -->
+<!-- saved from url=(0086)file:///C:/Users/Inderpal%20S%20Makhija/Downloads/distributor_incentive_hub%20(6).html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
@@ -773,16 +773,13 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,
             <tr style="background:#0057FF">
               <th style="color:#fff;font-weight:800;padding:8px 10px;text-align:left">Distributor</th>
               <th style="color:#fff;font-weight:800;padding:8px 10px;text-align:left">Region</th>
-              <th style="color:#fff;font-weight:800;padding:8px 10px;text-align:left">ABM/BM</th>
-              <th style="color:#fff;font-weight:800;padding:8px 10px;text-align:left">BE/BO</th>
-              <th style="color:#fff;font-weight:800;padding:8px 10px;text-align:right">Q Target</th>
               <th style="color:#fff;font-weight:800;padding:8px 10px;text-align:right">M1 (Apr) Actual</th>
               <th style="color:#fff;font-weight:800;padding:8px 10px;text-align:right">M2 (May) Actual</th>
               <th style="color:#fff;font-weight:800;padding:8px 10px;text-align:right">QTD Target</th>
               <th style="color:#fff;font-weight:800;padding:8px 10px;text-align:right">QTD Actual</th>
               <th style="color:#fff;font-weight:800;padding:8px 10px;text-align:right">QTD Ach%</th>
-              <th style="color:#fff;font-weight:800;padding:8px 10px;text-align:right">Monthly Inc</th>
-              <th style="color:#fff;font-weight:800;padding:8px 10px;text-align:center">Slab</th>
+              <th style="color:#fff;font-weight:800;padding:8px 10px;text-align:right">Incentive</th>
+              <th style="color:#fff;font-weight:800;padding:8px 10px;text-align:center">Status</th>
             </tr>
           </thead>
           <tbody id="iv-mgr-tbody"></tbody>
@@ -2396,7 +2393,6 @@ function ivBuildManager(){
     tr.style.background=i%2===0?'#fff':'var(--bg)';
     tr.innerHTML='<td style="padding:7px 10px;font-weight:700;border-bottom:1px solid var(--bg);font-size:11px">'+row.d.name+'</td>'+
       '<td style="padding:7px 10px;border-bottom:1px solid var(--bg);color:var(--sub)">'+row.d.region+'</td>'+
-      '<td style="padding:7px 10px;text-align:right;border-bottom:1px solid var(--bg)">Rs.'+fmtN(row.d.qTarget||0)+'</td>'+
       '<td style="padding:7px 10px;text-align:right;border-bottom:1px solid var(--bg)">Rs.'+fmtN(row.d.months[0].actual)+'</td>'+
       '<td style="padding:7px 10px;text-align:right;border-bottom:1px solid var(--bg)">Rs.'+fmtN(row.d.months[1].actual)+'</td>'+
       '<td style="padding:7px 10px;text-align:right;border-bottom:1px solid var(--bg)">Rs.'+fmtN(row.qtdTgt)+'</td>'+
