@@ -31,6 +31,9 @@ export default async function report(el, { app }) {
         ${n.scenarioReturns.map((s) => html`<tr><td>${s.scenario}</td><td class="num">${inr(s.value)}</td><td class="num">${pct(s.return3y)}</td><td class="num">${pct(s.return5y)}</td><td class="num">${pct(s.probability, 0)}</td></tr>`)}</tbody></table></div></div>
       <div class="card"><h3>9. Key assumptions <span class="prov assumption">Assumption</span></h3>${list(n.keyAssumptions)}</div>
       <div class="card"><h3>10. What would change the recommendation</h3>${list(n.whatWouldChange)}</div>
+      <div class="card"><h3>Macro context — national & international</h3><p><b>${n.macro.regime}</b></p>
+        <div class="grid g2"><div><h4>Tailwinds</h4>${list(n.macro.tailwinds, 'None')}</div><div><h4>Headwinds</h4>${list(n.macro.headwinds, 'None')}</div></div>
+        ${n.macro.worstStress ? html`<p>Worst macro stress: ${n.macro.worstStress}</p>` : ''}</div>
     </div>
     <div class="card" style="margin-top:16px"><div class="card-head"><h3>Red-team investment review</h3>${ack ? html`<span class="chip pos">Reviewed</span>` : html`<span class="chip warn">Not yet reviewed</span>`}</div>
       <p><b>${rt.bearThesis}</b></p>

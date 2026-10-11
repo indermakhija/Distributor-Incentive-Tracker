@@ -151,7 +151,7 @@ export function valuation(company, metrics, settings = {}) {
   const coc = costOfCapital(company, rates);
   const type = company.businessType || 'compounder';
   const weights = METHOD_WEIGHTS[type] || METHOD_WEIGHTS.compounder;
-  const scenarios = resolveScenarios(company, metrics);
+  const scenarios = resolveScenarios(company, metrics, settings.macroOverlay || null);
   const ctx = { shares, coc, rates, mult };
   result.coc = coc;
   result.businessType = type;
@@ -204,12 +204,23 @@ export function valuation(company, metrics, settings = {}) {
   })();
   result.dilutionImpact = metrics.dilution;
 
-  const reqMoS = settings.requiredMarginOfSafety ?? rates.requiredMarginOfSafety;
+  const baseMoS = settings.requiredMarginOfSafety ?? rates.requiredMarginOfSafety;
+  const reqMoS = Math.min(0.6, baseMoS + (settings.macroMoSUplift || 0));
   result.requiredMarginOfSafety = reqMoS;
+  result.macroMoSUplift = settings.macroMoSUplift || 0;
+  Object.defineProperty(result, 'ctx', { value: { shares, coc, rates, mult, weights, baseUsed }, enumerable: false });
   result.entryPrice = isNum(base) ? base * (1 - reqMoS) : null;
   result.entryRange = isNum(base) && isNum(bear) ? { low: Math.min(bear, base * (1 - reqMoS - 0.1)), high: base * (1 - reqMoS) } : null;
   result.status = valuationStatus(result);
   return result;
+}
+
+/** Blended intrinsic value for one ad-hoc scenario (used by macro stress tests), on the base-case method set. */
+export function scenarioValue(company, metrics, sc, ctx) {
+  const mv = methodValues(company, metrics, sc, 'base', ctx);
+  let w = 0, v = 0;
+  for (const m of ctx.baseUsed) if (isNum(mv[m]?.value)) { w += ctx.weights[m]; v += ctx.weights[m] * Math.max(0, mv[m].value); }
+  return w ? v / w : null;
 }
 
 export function valuationStatus(v) {

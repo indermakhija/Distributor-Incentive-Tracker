@@ -61,6 +61,8 @@ export function snapshotSummary(a) {
     entryPrice: a.valuation?.entryPrice ?? null,
     thesisStatus: a.thesis?.status ?? null,
     rating: last(a.company.creditRatings || [])?.rating ?? null,
+    macroScore: a.macro?.usable ? a.macro.impact.score : null,
+    macroRegime: a.macro?.regime ?? null,
     announcementIds: (a.company.announcements || []).map((x) => x.id || x.date + x.title)
   };
 }
@@ -95,6 +97,10 @@ export function generateAlerts(prev, cur, analysis, prefs = {}) {
   }
   if (isNum(cur.pledge) && isNum(prev.pledge) && cur.pledge - prev.pledge >= 0.05) add(cur.pledge > 0.5 ? 'critical' : 'high', 'Promoter pledging increased', `${pct(prev.pledge, 0)} → ${pct(cur.pledge, 0)} of promoter holding.`, 'Pledged shares can be force-sold, and pledging can signal financial stress at the promoter level.', true);
   if (isNum(cur.promoter) && isNum(prev.promoter) && prev.promoter - cur.promoter >= 0.02) add('high', 'Promoter stake reduced', `${pct(prev.promoter)} → ${pct(cur.promoter)}.`, 'Insiders selling may signal reduced confidence.', false);
+  if (isNum(cur.macroScore) && isNum(prev.macroScore) && Math.abs(cur.macroScore - prev.macroScore) >= 1.5)
+    add(cur.macroScore < prev.macroScore && cur.macroScore <= 3.5 ? 'high' : 'medium', `Macro regime ${cur.macroScore < prev.macroScore ? 'deteriorated' : 'improved'} for this company`, `Macro score ${prev.macroScore} → ${cur.macroScore} (${prev.macroRegime} → ${cur.macroRegime}).`, 'National/international factors this business is sensitive to have moved materially.', cur.macroScore < prev.macroScore);
+  else if (cur.macroRegime && prev.macroRegime && cur.macroRegime !== prev.macroRegime && prev.macroRegime !== 'No macro data')
+    add('low', 'Macro regime label changed', `${prev.macroRegime} → ${cur.macroRegime}.`, 'Informational.', false);
   if (cur.rating && prev.rating && cur.rating !== prev.rating) add('high', 'Credit rating changed', `${prev.rating} → ${cur.rating}.`, 'Rating actions change borrowing costs and signal lender views.', true);
   if (cur.thesisStatus !== prev.thesisStatus && cur.thesisStatus === 'broken') add('critical', 'Thesis-breaking event', 'One or more critical thesis assumptions failed.', 'The original reason to own the stock no longer holds.', true);
   else if (cur.thesisStatus !== prev.thesisStatus && cur.thesisStatus === 'at_risk') add('high', 'Thesis assumption under pressure', 'An assumption is within 10% of its failure threshold.', 'Early warning before the thesis breaks.', false);

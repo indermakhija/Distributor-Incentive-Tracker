@@ -15,8 +15,10 @@ import { ingest, TEMPLATE_CSV } from './ingest.js';
 import { integrationStatus, fetchQuote } from './adapters/index.js';
 import { reportHtml, reportPdf, analysisCsv, compareCsv } from './report.js';
 import * as ai from './ai/claude.js';
+import { macroStore, registerBridge } from './bridge.js';
+import { VALUATION_STATUS_LABEL } from '../engine/valuation.js';
 
-const EDITABLE = ['name', 'ticker', 'exchange', 'isin', 'sector', 'website', 'description', 'businessType', 'macroFactors', 'market', 'financials', 'segments', 'shareholding', 'businessModel', 'businessQuality', 'industry', 'competitors', 'management', 'moat', 'catalysts', 'risks', 'scenarios', 'valuationInputs', 'creditRatings', 'announcements', 'sources', 'contradictions', 'provenance'];
+const EDITABLE = ['name', 'ticker', 'exchange', 'isin', 'sector', 'website', 'description', 'businessType', 'macroFactors', 'market', 'financials', 'segments', 'shareholding', 'businessModel', 'businessQuality', 'industry', 'competitors', 'management', 'moat', 'catalysts', 'risks', 'scenarios', 'valuationInputs', 'creditRatings', 'announcements', 'sources', 'contradictions', 'provenance', 'macroExposure', 'macroOverlay'];
 const ARRAYS = ['macroFactors', 'segments', 'shareholding', 'competitors', 'catalysts', 'risks', 'creditRatings', 'announcements', 'sources', 'contradictions'];
 const BUSINESS_TYPES = ['compounder', 'growth', 'cyclical', 'financial', 'asset_heavy', 'turnaround', 'conglomerate'];
 export const DEFAULT_SETTINGS = { weights: DEFAULT_WEIGHTS, rates: DEFAULT_RATES, limits: DEFAULT_LIMITS, requiredMarginOfSafety: 0.2, cash: 0, priceAlerts: false, priceMovePct: 0.1 };
@@ -30,12 +32,16 @@ export function buildApi({ db, sampleDir, secureCookies }) {
   const limiter = makeRateLimiter({ max: 10 });
   const samples = loadSamples(sampleDir);
   const quickCache = new Map();
+  const store = macroStore(db);
+  const macroSampleFile = join(sampleDir, '..', 'macro-sample.json');
+  const macroOf = (user) => { store.seedSample(user.id, macroSampleFile); return store.dataset(user.id); };
 
   const audit = (user, action, entity, id, detail, ip) => db.run('INSERT INTO audit_log (user_id, action, entity, entity_id, detail, ip, created_at) VALUES (?,?,?,?,?,?,?)', user?.id ?? null, action, entity, id == null ? null : String(id), j(detail), ip, now());
 
   const seedUser = (userId) => db.tx(() => {
     for (const s of samples) db.run('INSERT OR IGNORE INTO companies (user_id, cid, data, created_at, updated_at) VALUES (?,?,?,?,?)', userId, s.id, j(s), now(), now());
     db.run('INSERT OR IGNORE INTO settings (user_id, data) VALUES (?,?)', userId, j(DEFAULT_SETTINGS));
+    store.seedSample(userId, macroSampleFile);
   });
 
   const getCompanyRow = (user, cid) => {
@@ -49,12 +55,13 @@ export function buildApi({ db, sampleDir, secureCookies }) {
   const assessmentOf = (user, cid) => pj(db.get('SELECT data FROM assessments WHERE user_id = ? AND company_id = ?', user.id, cid)?.data);
 
   /** Quick context-free analysis of the user's other companies, used for opportunity-cost comparisons. */
-  const alternativesFor = (user, cid, settings) => db.all('SELECT cid, data, updated_at FROM companies WHERE user_id = ? AND cid != ?', user.id, cid).map((row) => {
-    const key = `${user.id}:${row.cid}:${row.updated_at}:${JSON.stringify(settings.rates)}`;
+  const alternativesFor = (user, cid, settings, macro) => db.all('SELECT cid, data, updated_at FROM companies WHERE user_id = ? AND cid != ?', user.id, cid).map((row) => {
+    const macroStamp = db.get('SELECT MAX(updated_at) t FROM macro_readings WHERE user_id = ?', user.id)?.t;
+    const key = `${user.id}:${row.cid}:${row.updated_at}:${JSON.stringify(settings.rates)}:${macroStamp}`;
     let q = quickCache.get(key);
     if (!q) {
       const c = pj(row.data);
-      const a = analyze(c, { settings });
+      const a = analyze(c, { settings, macro });
       q = { name: c.name, ticker: c.ticker, expectedReturn5y: a.valuation?.scenarios?.base?.expectedReturn5y, quality: a.decision.quality, confidence: a.decision.confidence };
       quickCache.set(key, q);
     }
@@ -67,9 +74,10 @@ export function buildApi({ db, sampleDir, secureCookies }) {
     const c = row.data;
     const holding = holdings.find((h) => h.ticker && h.ticker === c.ticker);
     const ack = db.get('SELECT acknowledged_at FROM redteam_reviews WHERE user_id = ? AND company_id = ? ORDER BY id DESC LIMIT 1', user.id, row.cid);
+    const macro = macroOf(user);
     return {
-      settings, holdings, cash: settings.cash, assessment: assessmentOf(user, row.cid), thesis: latestThesis(user, row.cid),
-      alternatives: alternativesFor(user, row.cid, settings), holder: overrides.holder ?? !!holding,
+      settings, holdings, cash: settings.cash, assessment: assessmentOf(user, row.cid), thesis: latestThesis(user, row.cid), macro,
+      alternatives: alternativesFor(user, row.cid, settings, macro), holder: overrides.holder ?? !!holding,
       redTeamAcknowledged: !!ack && ack.acknowledged_at >= row.updated_at
     };
   };
@@ -98,6 +106,38 @@ export function buildApi({ db, sampleDir, secureCookies }) {
     const row = getCompanyRow(user, cid);
     return saveSnapshot(user, row, runAnalysis(user, row), ip).alerts;
   };
+
+  const refreshAllWatched = (user, ip) => db.all('SELECT company_id FROM watchlist WHERE user_id = ?', user.id).flatMap((w) => {
+    try { return refreshIfWatched(user, w.company_id, ip); } catch { return []; }
+  });
+
+  /** Matches a company by ISIN or ticker (accepts NSE:/BSE: prefixes and .NS/.BO suffixes). */
+  const findCompanyRow = (user, { ticker, isin }) => {
+    const norm = (t) => String(t || '').toUpperCase().replace(/^(NSE|BSE):/, '').replace(/\.(NS|BO)$/, '').trim();
+    const rows = db.all('SELECT * FROM companies WHERE user_id = ?', user.id).map((r) => ({ ...r, data: pj(r.data) }));
+    if (isin) { const hit = rows.find((r) => r.data.isin && r.data.isin.toUpperCase() === String(isin).toUpperCase()); if (hit) return hit; }
+    if (ticker) return rows.find((r) => norm(r.data.ticker) === norm(ticker)) || null;
+    return null;
+  };
+
+  /** Compact analyser payload consumed by the Nifty terminal (and the embed card). */
+  const compact = (a) => ({
+    engineVersion: a.engineVersion, generatedAt: a.generatedAt,
+    company: { id: a.company.id, name: a.company.name, ticker: a.company.ticker, isin: a.company.isin, sector: a.company.sector, dataStatus: a.company.dataStatus },
+    price: { value: a.company.market?.price ?? null, asOf: a.company.market?.priceTimestamp || a.company.market?.priceDate || null, source: a.company.market?.source || null, type: a.company.market?.type || null },
+    decision: { code: a.decision.code, label: a.decision.label, status: a.decision.status, gates: a.decision.gates, confidence: a.decision.confidence, entryPrice: a.decision.entryPrice ?? null, entryRange: a.decision.entryRange, greatBusiness: a.decision.greatBusiness, greatInvestment: a.decision.greatInvestment },
+    headline: a.narrative.headline, businessVsInvestment: a.narrative.businessVsInvestment,
+    holistic: a.aggregate.holistic, band: a.aggregate.band.label, quality: a.decision.quality,
+    dimensions: a.aggregate.rows.map((r) => ({ id: r.id, label: r.label, score: r.score, weight: r.weight })),
+    valuation: a.valuation?.intrinsic ? { status: a.valuation.status, statusLabel: VALUATION_STATUS_LABEL[a.valuation.status], bear: a.valuation.intrinsic.bear, base: a.valuation.intrinsic.base, bull: a.valuation.intrinsic.bull, marginOfSafety: a.valuation.marginOfSafety, requiredMarginOfSafety: a.valuation.requiredMarginOfSafety, impliedGrowth10y: a.valuation.reverseDcf?.impliedRevenueCagr10y ?? null, expectedReturn5y: a.valuation.scenarios.base.expectedReturn5y } : null,
+    macro: { regime: a.macro.regime, score: a.macro.usable ? a.macro.impact.score : null, sensitivity: a.macro.impact.sensitivity, national: a.macro.impact.national, international: a.macro.impact.international,
+      tailwinds: a.macro.impact.tailwinds.slice(0, 5).map((x) => ({ factor: x.name, scope: x.scope, contribution: x.contribution })), headwinds: a.macro.impact.headwinds.slice(0, 5).map((x) => ({ factor: x.name, scope: x.scope, contribution: x.contribution })),
+      stress: (a.macro.stress || []).map((x) => ({ id: x.id, name: x.name, value: x.value, vsBase: x.vsBase, vsPrice: x.vsPrice })), dataset: a.macro.dataset },
+    overrides: a.decision.rules.map((r) => ({ id: r.id, severity: r.severity, title: r.title, cap: r.cap })),
+    redTeam: a.redTeam.strongestThree.map((p) => ({ severity: p.severity, claim: p.claim, evidence: p.evidence })),
+    dataQuality: { confidence: a.dataQuality.confidence, issues: a.dataQuality.issues.map((i) => i.text) },
+    disclaimer: 'Decision support, not investment advice. Valuations are estimates with wide uncertainty.'
+  });
 
   const updateCompany = (user, row, data, ip, action, detail) => {
     db.run('UPDATE companies SET data = ?, updated_at = ? WHERE uid = ?', j(data), now(), row.uid);
@@ -182,6 +222,8 @@ export function buildApi({ db, sampleDir, secureCookies }) {
       if (ARRAYS.includes(k) && !Array.isArray(v)) throw new HttpError(400, `Field "${k}" must be an array.`);
       if (!ARRAYS.includes(k) && v !== null && typeof v === 'object' && Array.isArray(v)) throw new HttpError(400, `Field "${k}" must be an object.`);
       if (k === 'businessType' && !BUSINESS_TYPES.includes(v)) throw new HttpError(400, 'Invalid business type.');
+      if (k === 'macroOverlay' && !['auto', 'always', 'off'].includes(v)) throw new HttpError(400, 'macroOverlay must be auto, always or off.');
+      if (k === 'macroExposure' && (typeof v !== 'object' || v === null || Array.isArray(v) || Object.values(v).some((x) => !Number.isFinite(Number(typeof x === 'object' ? x?.value : x)) || Math.abs(Number(typeof x === 'object' ? x.value : x)) > 2))) throw new HttpError(400, 'macroExposure must map factor ids to sensitivities between -2 and 2.');
       data[k] = v;
       changed.push(k);
     }
@@ -468,7 +510,11 @@ export function buildApi({ db, sampleDir, secureCookies }) {
   });
 
   // ------------------------------------------------------------------ integrations, AI, audit
-  r.get('/api/integrations', async (ctx) => ({ body: integrationStatus({ sample: db.get("SELECT COUNT(*) n FROM companies WHERE user_id = ? AND json_extract(data, '$.dataStatus') = 'sample'", ctx.user.id).n }) }));
+  r.get('/api/integrations', async (ctx) => {
+    const t = db.get('SELECT COUNT(*) n, MAX(last_used_at) last FROM bridge_tokens WHERE user_id = ? AND revoked = 0', ctx.user.id);
+    const m = db.get("SELECT COUNT(*) total, SUM(type = 'live') live FROM macro_readings WHERE user_id = ?", ctx.user.id);
+    return { body: integrationStatus({ sample: db.get("SELECT COUNT(*) n FROM companies WHERE user_id = ? AND json_extract(data, '$.dataStatus') = 'sample'", ctx.user.id).n }, { tokens: t.n, lastUsed: t.last, liveMacro: m.live || 0, totalMacro: m.total }) };
+  });
   r.post('/api/ai/explain/:id', async (ctx) => { const row = getCompanyRow(ctx.user, ctx.params.id); audit(ctx.user, 'ai.explain', 'company', row.cid, null, ctx.ip); return { body: await ai.explain(runAnalysis(ctx.user, row)) }; });
   r.post('/api/ai/redteam/:id', async (ctx) => { const row = getCompanyRow(ctx.user, ctx.params.id); audit(ctx.user, 'ai.redteam', 'company', row.cid, null, ctx.ip); return { body: await ai.aiRedTeam(runAnalysis(ctx.user, row)) }; });
   r.post('/api/ai/grade/:id', async (ctx) => {
@@ -486,5 +532,15 @@ export function buildApi({ db, sampleDir, secureCookies }) {
   });
   r.get('/api/audit', async (ctx) => ({ body: db.all('SELECT id, action, entity, entity_id, detail, created_at FROM audit_log WHERE user_id = ? ORDER BY id DESC LIMIT 300', ctx.user.id).map((x) => ({ ...x, detail: pj(x.detail) })) }));
 
+  const bridge = registerBridge(r, { db, audit, store, findCompanyRow, getCompanyRow, runAnalysis, refreshIfWatched, refreshAllWatched, compact });
+  r.embedCard = (token) => {
+    const p = bridge.verifyEmbed(token);
+    if (!p) return null;
+    const user = db.get('SELECT id, email, name FROM users WHERE id = ?', p.u);
+    if (!user) return null;
+    const row = db.get('SELECT * FROM companies WHERE user_id = ? AND cid = ?', p.u, p.c);
+    if (!row) return null;
+    return compact(runAnalysis(user, { ...row, data: pj(row.data) }));
+  };
   return r;
 }

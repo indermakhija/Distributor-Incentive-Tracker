@@ -7,7 +7,7 @@ const TABS = {
   overview: () => import('./tabs/overview.js'), business: () => import('./tabs/business.js'), industry: () => import('./tabs/industry.js'),
   financials: () => import('./tabs/financials.js'), management: () => import('./tabs/management.js'), moat: () => import('./tabs/moat.js'),
   prospects: () => import('./tabs/prospects.js'), risks: () => import('./tabs/risks.js'), valuation: () => import('./tabs/valuation.js'),
-  investor: () => import('./tabs/investor.js'), fit: () => import('./tabs/fit.js'), scoring: () => import('./tabs/scoring.js'),
+  investor: () => import('./tabs/investor.js'), macro: () => import('./tabs/macrotab.js'), fit: () => import('./tabs/fit.js'), scoring: () => import('./tabs/scoring.js'),
   report: () => import('./tabs/report.js'), documents: () => import('./tabs/documents.js'), thesis: () => import('./tabs/thesis.js')
 };
 

@@ -6,13 +6,13 @@ import { analyze } from '/engine/analyze.js';
 const views = {
   home: () => import('./views/home.js'), search: () => import('./views/search.js'), compare: () => import('./views/compare.js'),
   watchlist: () => import('./views/watchlist.js'), decisions: () => import('./views/decisions.js'), portfolio: () => import('./views/holdings.js'),
-  settings: () => import('./views/settings.js'), company: () => import('./views/company.js')
+  settings: () => import('./views/settings.js'), macro: () => import('./views/macro.js'), company: () => import('./views/company.js')
 };
 
 export const COMPANY_TABS = [
   ['overview', 'Overview'], ['business', 'Business model'], ['industry', 'Industry & peers'], ['financials', 'Financials'], ['management', 'Management'],
   ['moat', 'Moat'], ['prospects', 'Prospects & scenarios'], ['risks', 'Risk register'], ['valuation', 'Valuation lab'], ['investor', 'Self-assessment'],
-  ['fit', 'Portfolio fit'], ['scoring', 'Holistic score'], ['report', 'Decision report'], ['documents', 'Documents & sources'], ['thesis', 'Thesis tracker']
+  ['macro', 'Macro factors'], ['fit', 'Portfolio fit'], ['scoring', 'Holistic score'], ['report', 'Decision report'], ['documents', 'Documents & sources'], ['thesis', 'Thesis tracker']
 ];
 
 export const app = {
@@ -30,7 +30,7 @@ export const app = {
     const { ctx } = this.co;
     this.co.analysis = analyze(companyOverride || this.co.company, {
       settings: ctx.settings, assessment: ctx.assessment, holdings: ctx.holdings, cash: ctx.cash, thesis: ctx.thesis,
-      alternatives: ctx.alternatives, holder: ctx.holder, redTeamAcknowledged: ctx.redTeamAcknowledged
+      alternatives: ctx.alternatives, holder: ctx.holder, redTeamAcknowledged: ctx.redTeamAcknowledged, macro: ctx.macro
     });
     return this.co.analysis;
   },
@@ -58,7 +58,7 @@ function renderSidebar(parts) {
   const co = parts[0] === 'c' && app.co?.id === parts[1] ? app.co.company : null;
   mount($('#sidebar'), html`
     <div class="group"><div class="group-title">Terminal</div>
-      ${link('home', 'Home dashboard', '⌂')}${link('search', 'Search & discovery', '⌕')}${link('compare', 'Compare companies', '⇆')}
+      ${link('home', 'Home dashboard', '⌂')}${link('search', 'Search & discovery', '⌕')}${link('compare', 'Compare companies', '⇆')}${link('macro', 'Macro dashboard', '🌐')}
       ${link('watchlist', 'Watchlist & alerts', '◉')}${link('decisions', 'Decision history', '☰')}${link('portfolio', 'My portfolio', '◧')}${link('settings', 'Settings & scoring', '⚙')}
     </div>
     ${co ? html`<div class="group company-nav"><div class="group-title">${co.name}</div>${COMPANY_TABS.map(([t, l]) => link(`c/${parts[1]}/${t}`, l, '·'))}</div>` : ''}

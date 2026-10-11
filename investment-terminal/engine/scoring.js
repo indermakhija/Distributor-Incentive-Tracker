@@ -259,7 +259,7 @@ export function scoreValuation(c, val) {
 
 // ---------------------------------------------------------------- risk
 export function riskScore(r) { return (r.probability ?? 0.3) * (r.impact ?? 3); } // 0–5
-export function scoreRisk(c, val) {
+export function scoreRisk(c, val, macro) {
   const d = dim('risk');
   const risks = (c.risks || []).filter((r) => !SCORED_ELSEWHERE.includes((r.category || '').toLowerCase()));
   const excluded = (c.risks || []).length - risks.length;
@@ -278,6 +278,14 @@ export function scoreRisk(c, val) {
     if (val.downsideToBear < -0.4) d.negatives.push(`Bear case implies a ${pct(-val.downsideToBear, 0)} fall from the current price.`);
     if (val.downsideToBear > -0.1) d.positives.push('Limited downside even in the bear case.');
   }
+  // Macro stress is measured against base intrinsic value (not price) so it does not double-count valuation.
+  const stress = (macro?.stress || []).filter((x) => isNum(x.vsBase) && x.id !== 'easing');
+  if (macro?.usable && stress.length) {
+    const worst = stress.reduce((w, x) => (x.vsBase < w.vsBase ? x : w));
+    comp(d, `Macro stress sensitivity (worst: ${worst.name})`, scale(worst.vsBase, -0.4, 0), 0.25, 'calculated', `${pct(worst.vsBase, 0)} vs base value`);
+    if (worst.vsBase < -0.2) d.negatives.push(`Macro stress — ${worst.name}: estimated value falls ${pct(-worst.vsBase, 0)}.`);
+    if (worst.vsBase > -0.08) d.positives.push('Resilient across national and international macro stress scenarios.');
+  } else if (macro && !macro.usable) d.missing.push('Macro dataset (needed for macro stress tests).');
   d.confidence = 0.3 + (risks.length >= 4 ? 0.4 : risks.length * 0.1) + (isNum(val?.downsideToBear) ? 0.3 : 0);
   d.monitoring.push(...risks.map((r) => r.warning).filter(Boolean).slice(0, 6));
   return finish(d);

@@ -203,3 +203,7 @@ details summary { cursor: pointer; font-weight: 600; }
 }
 @media print { .topbar, .sidebar, .tabs, .btn, .btn-row { display: none !important; } .shell { display: block; } .card { box-shadow: none; break-inside: avoid; } }
 @media (forced-colors: active) { .score-bar > span { background: CanvasText; } }
+.sig { display: inline-block; position: relative; width: 90px; height: 8px; background: var(--surface-2); border-radius: 4px; vertical-align: middle; }
+.sig-mid { position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--axis); }
+.sig-fill { position: absolute; top: 0; bottom: 0; border-radius: 4px; }
+pre.code { background: var(--surface-2); padding: 10px; border-radius: var(--r-s); overflow-x: auto; font-size: 12px; }

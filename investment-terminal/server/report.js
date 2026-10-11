@@ -18,6 +18,7 @@ function sections(a) {
       ['Holistic score', `${a.aggregate.holistic}/100 — ${a.aggregate.band.label}`],
       ...a.aggregate.rows.map((r) => [r.label, r.score == null ? 'Not scored' : `${r.score}/10 (weight ${r.weight}%, contribution ${r.contribution ?? '—'})`]),
       ['Valuation status', VALUATION_STATUS_LABEL[v?.status] || 'n/a'],
+      ['Macro regime', a.macro?.usable ? `${a.macro.regime} (${a.macro.impact.score}/10, ${a.macro.impact.sensitivity} sensitivity)` : 'No macro data'],
       ['Evidence confidence', pct(d.confidence, 0)],
       ['Report generated', a.generatedAt]
     ],
@@ -33,6 +34,7 @@ function sections(a) {
       ['8. Scenario values and returns', n.scenarioReturns.map((s) => `${s.scenario.toUpperCase()}: value ₹${num(s.value)} | 3y ${pct(s.return3y)} p.a. | 5y ${pct(s.return5y)} p.a. | probability ${pct(s.probability, 0)}`)],
       ['9. Key assumptions', n.keyAssumptions],
       ['10. What would change the recommendation', n.whatWouldChange],
+      ['Macro context (national & international)', [n.macro.regime, n.macro.tailwinds.length ? `Tailwinds: ${n.macro.tailwinds.join(', ')}` : null, n.macro.headwinds.length ? `Headwinds: ${n.macro.headwinds.join(', ')}` : null, n.macro.worstStress ? `Worst stress: ${n.macro.worstStress}` : null].filter(Boolean)],
       ['Override rules applied', d.rules.map((r) => `[${r.severity.toUpperCase()}] ${r.title}: ${r.message}`)],
       ['BUY checklist (a BUY needs every item)', d.buyChecklist.map((c) => `${c.ok ? '✔' : '✘'} ${c.item} (${c.value ?? 'n/a'})`)],
       ['Red-team bear thesis', [a.redTeam.bearThesis, ...a.redTeam.points.slice(0, 8).map((p) => `[${p.severity}] ${p.claim} ${p.evidence}`)]],

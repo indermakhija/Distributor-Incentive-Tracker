@@ -175,3 +175,55 @@ test('settings: weights must total 100; integrations report real status', async 
   const ai = await c.post('/api/ai/explain/sample-acb');
   if (!process.env.ANTHROPIC_API_KEY) assert.equal(ai.data.available, false);
 });
+
+test('bridge: token auth, live macro push re-analyses watchlist, quotes, analysis and embed', async () => {
+  const c = await register('bridge@test.dev');
+  const macro = (await c.get('/api/macro')).data;
+  assert.equal(macro.quality.status, 'sample', 'new accounts get labelled sample macro readings');
+  const anon = await c.call('POST', '/api/bridge/macro', { readings: [] }, { headers: { Authorization: 'Bearer hit_invalidinvalidinvalid' } });
+  assert.equal(anon.status, 401);
+  const tok = (await c.post('/api/bridge/tokens', { name: 'Nifty test' })).data.token;
+  assert.match(tok, /^hit_/);
+  const B = { headers: { Authorization: `Bearer ${tok}`, 'X-Requested-With': '' } };
+  await c.post('/api/watchlist', { companyId: 'sample-dpe' });
+  const push = await c.call('POST', '/api/bridge/macro', { readings: [
+    { factorId: 'in_repo', value: 7.5, asOf: '2026-10-10', source: 'test feed' }, { factorId: 'in_govcapex', value: -15, asOf: '2026-10-10' },
+    { factorId: 'in_gsec10', value: 8.1, asOf: '2026-10-10' }, { factorId: 'nope', value: 1, asOf: '2026-10-10' }, { factorId: 'brent', value: 80 }] }, B);
+  assert.equal(push.status, 200);
+  assert.deepEqual(push.data.accepted, ['in_repo', 'in_govcapex', 'in_gsec10']);
+  assert.equal(push.data.rejected.length, 2, 'unknown factor and undated reading rejected');
+  assert.ok(push.data.alerts >= 1, 'macro shift raised an alert on the watchlisted company');
+  const live = (await c.get('/api/macro')).data;
+  assert.equal(live.readings.in_repo.type, 'live');
+  assert.equal(live.readings.in_repo.previous, 6, 'no reading older than the lookback yet, so the stored ~3-month comparison is kept');
+
+  const co = (await c.post('/api/companies', { name: 'Bridge Live Co (TEST DATA)', ticker: 'BLC', isin: 'INE111B01011', sector: 'Capital Goods' })).data;
+  const q = await c.call('POST', '/api/bridge/quotes', { quotes: [{ ticker: 'NSE:BLC', price: 321.5, timestamp: '2026-10-11T09:30:00Z' }, { isin: 'INE111B01011', price: 322, timestamp: '2026-10-11T09:31:00Z' }, { ticker: 'SAMPLE-ACB', price: 1, timestamp: '2026-10-11T09:30:00Z' }, { ticker: 'BLC', price: -1, timestamp: '2026-10-11T09:30:00Z' }] }, B);
+  assert.deepEqual(q.data.updated, ['BLC', 'BLC']);
+  assert.equal(q.data.rejected.length, 2, 'sample company and invalid price rejected');
+  const after = (await c.get(`/api/companies/${co.id}`)).data;
+  assert.equal(after.market.price, 322);
+  assert.equal(after.market.type, 'live');
+
+  const an = await c.call('GET', '/api/bridge/analysis?ticker=SAMPLE-DPE', undefined, B);
+  assert.equal(an.status, 200);
+  assert.ok(an.data.macro.score <= 4, 'compact payload carries the live macro regime');
+  assert.ok(an.data.macro.stress.length >= 5);
+  assert.ok(an.data.dimensions.length === 10);
+  const link = await c.call('GET', '/api/bridge/embed-link?ticker=SAMPLE-DPE', undefined, B);
+  const url = new URL(link.data.url);
+  const page = await fetch(base + url.pathname + url.search);
+  assert.equal(page.status, 200);
+  const body = await page.text();
+  assert.match(body, /Macro — national &amp; international/);
+  assert.equal(page.headers.get('x-frame-options'), null);
+  assert.match(page.headers.get('content-security-policy'), /frame-ancestors/);
+  const bad = await fetch(base + '/embed/analyser?t=' + url.searchParams.get('t').replace(/.$/, 'x'));
+  assert.equal(bad.status, 401, 'tampered embed link rejected');
+  // Revoked token loses access.
+  const toks = (await c.get('/api/bridge/tokens')).data;
+  await c.del(`/api/bridge/tokens/${toks[0].id}`);
+  assert.equal((await c.call('GET', '/api/bridge/analysis?ticker=SAMPLE-DPE', undefined, B)).status, 401);
+  const integ = (await c.get('/api/integrations')).data;
+  assert.ok(integ.some((i) => i.id === 'nifty_bridge'));
+});

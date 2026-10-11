@@ -16,7 +16,7 @@ This is decision support, not investment advice. It never claims to predict pric
 cd investment-terminal
 npm install
 npm start            # http://127.0.0.1:3000
-npm test             # 36 unit + integration tests
+npm test             # 44 unit + integration tests
 ```
 
 Requires **Node.js ≥ 22.5** (uses the built-in `node:sqlite`). Create an account in the browser. Each new account gets
@@ -41,6 +41,8 @@ consistent but **synthetic**, and every screen, report and export labels them as
 | `ANTHROPIC_API_KEY` | Turns on the optional AI explanation, AI red-team and AI answer-grading layer (Claude, model `claude-opus-5-5`; override with `AI_MODEL`) |
 | `MARKET_DATA_ENDPOINT`, `MARKET_DATA_API_KEY` | A **licensed** quote provider returning `{ price, timestamp }` for `GET ?symbol=TICKER`. There is no scraping fallback. |
 | `COOKIE_SECURE=1` / `TRUST_PROXY=1` | Use these behind HTTPS or a reverse proxy |
+| `EMBED_ALLOWED_ORIGINS` | Comma-separated sites allowed to iframe the analyser card, e.g. `https://nifty-terminal.fly.dev` |
+| `PUBLIC_URL`, `EMBED_SECRET` | Public base URL used in embed links; the key that signs them (otherwise generated at startup) |
 
 API keys never reach the browser. **Settings → Integrations** shows the real status of every integration. Nothing
 is labelled "live" unless it is.
@@ -72,6 +74,56 @@ is labelled "live" unless it is.
 | History | Decision history | Recorded decisions with the snapshot from that time, return since, score and value then vs now, and a process-vs-outcome review. |
 | Compare | Compare | 2–8 companies side by side, ranked under the same weights, rates and rules. |
 
+### Macro factors — national & international
+
+`engine/macro.js` holds 27 factors:
+
+- **India (15):** RBI repo rate, CPI, GDP, IIP, manufacturing PMI, 10-year G-sec yield, USD/INR, FPI flows, bank
+  credit growth, GST collections, monsoon, rural wages, government capex, fiscal deficit, India VIX.
+- **International (12):** Fed funds rate, US 10-year yield, DXY, Brent, US CPI, US GDP, China PMI, global PMI,
+  copper, gold, CBOE VIX, geopolitical risk index.
+
+How they reach a company:
+
+- **Sensitivities.** Each company has a sensitivity (−2…+2) to each factor. The starting values come from 17
+  sector templates, the company's thematic tags, leverage and export share. Each value shows its basis, and you can
+  override any of them on the company's **Macro factors** tab.
+- **Signal.** Each factor gets a signal (level vs a neutral value, plus momentum vs ~3 months ago).
+- **Macro score.** Sensitivity × signal gives the company a 0–10 macro score, split into national and
+  international pull, with its tailwinds and headwinds listed.
+
+How the macro score drives the decision:
+
+1. **Overlay.** Scenario assumptions are adjusted by up to ±3pp revenue growth and ±1.5pp margin. By default this
+   applies only to auto-derived scenarios; it can also apply to your own scenarios, or be switched off.
+2. **Stress tests.** The base case is re-valued under nine national and international shocks: oil, rate hikes,
+   rupee slide, global recession, weak monsoon, China slowdown, government capex cut, geopolitical shock, and an
+   easing upside case. The worst result feeds the risk dimension. It is measured against base value, not price, so
+   valuation is not counted twice.
+3. **Margin of safety.** In an adverse regime, a macro-sensitive company needs a margin of safety 5–10pp higher.
+4. **Overrides.** A strong headwind caps BUY at BUY BELOW; fragility under stress and missing or sample macro data
+   are disclosed; macro points are added to the red team.
+5. **Alerts.** When the macro regime moves materially, watchlisted companies raise an alert.
+
+New accounts get **clearly-labelled sample macro readings** so the feature can be tried. Replace them with live
+readings from the Nifty terminal bridge, or with manual readings on the **Macro dashboard**. Every reading needs a
+date and a source.
+
+### Nifty terminal bridge (live connectivity)
+
+The Nifty terminal already has live market data. The bridge lets it feed this engine and show the result on its
+Analyser page. It works with any tech stack. Create a token in **Settings → Nifty terminal bridge** (stored hashed,
+revocable) and keep it in the Nifty terminal's backend:
+
+| Call | Purpose |
+|---|---|
+| `POST /api/bridge/macro` `{readings:[{factorId,value,asOf,source}]}` | Pushes live macro readings. Watchlisted companies are re-analysed and alerts raised. |
+| `POST /api/bridge/quotes` `{quotes:[{ticker or isin,price,timestamp}]}` | Pushes live prices. Tickers can use `NSE:`/`.NS`. Sample companies are refused. |
+| `GET /api/bridge/analysis?ticker=` | Compact analyser JSON: decision, scores, valuation, macro regime, stress tests, red team, overrides. |
+| `GET /api/bridge/embed-link?ticker=` | A signed 15-minute URL for `<iframe src>` on the Analyser page. Allowed parent sites are set in `EMBED_ALLOWED_ORIGINS`. |
+
+All calls send `Authorization: Bearer hit_…`. The full guide, with request examples, is in Settings.
+
 ### Why a BUY is never produced from the score alone
 
 `engine/decision.js` builds a base decision from **business quality** (a composite of six dimensions) and **valuation
@@ -99,6 +151,7 @@ engine/            Pure ES modules (run on server AND in the browser)
   investor.js      Module J scoring & bias detection     portfolio.js   fit & opportunity cost
   redteam.js       counter-thesis generator              monitoring.js  thesis evaluation & alerts
   dataquality.js   provenance, staleness, confidence     analyze.js     orchestrator + narrative
+  macro.js         macro factors, sensitivities, regime, overlay, stress scenarios
 server/
   app.js / http.js HTTP server, CSRF/origin checks, security headers, static files
   api.js           REST API (auth, companies, analysis, documents, thesis, decisions, watchlist, alerts, exports)
@@ -107,6 +160,8 @@ server/
                    watchlist, alerts, holdings, settings, red-team reviews, audit_log)
   ingest.js        CSV/XLSX/PDF/TXT parsing & signal extraction
   report.js        HTML / PDF / CSV generation
+  bridge.js        macro store, Nifty-terminal bridge (tokens, push, analysis, signed embed links)
+  embed.js         server-rendered analyser card for iframe embedding
   adapters/        integration registry + licensed market-data adapter
   ai/claude.js     optional AI layer (grounded strictly in computed evidence; output labelled AI-generated)
 public/            Vanilla-JS SPA (20+ screens), light/dark themes, responsive; Chart.js served locally

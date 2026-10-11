@@ -1,0 +1,194 @@
+{
+  "_note": "ILLUSTRATIVE SAMPLE macro readings for demonstrating the macro layer. NOT current data. Replace via the Nifty terminal bridge (live) or the Macro dashboard.",
+  "readings": {
+    "in_repo": {
+      "value": 5.5,
+      "previous": 6,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "in_cpi": {
+      "value": 3.2,
+      "previous": 2.8,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "in_gdp": {
+      "value": 6.8,
+      "previous": 7.1,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "in_iip": {
+      "value": 3.9,
+      "previous": 4.5,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "in_pmi_mfg": {
+      "value": 57.5,
+      "previous": 58.2,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "in_gsec10": {
+      "value": 6.45,
+      "previous": 6.6,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "in_inr": {
+      "value": 88.2,
+      "previous": 86.5,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "in_fii_flows": {
+      "value": -12,
+      "previous": 5,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "in_credit": {
+      "value": 11,
+      "previous": 11.5,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "in_gst": {
+      "value": 8.5,
+      "previous": 9.5,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "in_monsoon": {
+      "value": 106,
+      "previous": null,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "in_rural": {
+      "value": 1.5,
+      "previous": 0.8,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "in_govcapex": {
+      "value": 12,
+      "previous": 17,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "in_fiscal": {
+      "value": 4.4,
+      "previous": 4.8,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "in_vix": {
+      "value": 13.5,
+      "previous": 12.8,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "us_fed": {
+      "value": 3.75,
+      "previous": 4.25,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "us_10y": {
+      "value": 4.1,
+      "previous": 4.3,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "dxy": {
+      "value": 98,
+      "previous": 99.5,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "brent": {
+      "value": 68,
+      "previous": 72,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "us_cpi": {
+      "value": 2.9,
+      "previous": 2.7,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "us_gdp": {
+      "value": 1.6,
+      "previous": 2,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "cn_pmi": {
+      "value": 49.6,
+      "previous": 49.8,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "gl_pmi": {
+      "value": 50.2,
+      "previous": 49.9,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "copper": {
+      "value": 9800,
+      "previous": 9400,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "gold": {
+      "value": 3500,
+      "previous": 3300,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "vix": {
+      "value": 16,
+      "previous": 15,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    },
+    "gpr": {
+      "value": 125,
+      "previous": 110,
+      "asOf": "2026-09-30",
+      "source": "Illustrative sample",
+      "type": "sample"
+    }
+  }
+}

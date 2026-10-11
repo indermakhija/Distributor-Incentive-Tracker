@@ -38,6 +38,13 @@ export function redTeam(a) {
     for (const b of inv.biases.filter((x) => x.severity === 'high')) add('medium', `Your own process: ${b.label}.`, b.why, b.countermeasure, 'investor');
     if (inv.knowledgeScore < 6) add('medium', 'You may not know enough to hold through volatility.', `Demonstrated knowledge ${inv.knowledgeScore}/10.`, 'Answer the missed evidence questions before buying.', 'investor');
   }
+  const mc = a.macro;
+  if (mc?.usable) {
+    for (const h of mc.impact.headwinds.slice(0, 2)) add('medium', `Macro headwind: ${h.name}.`, `${h.name} is ${h.direction} (${h.value} ${h.unit}); the business is ${h.sensitivity < 0 ? 'hurt' : 'helped'} when it rises (sensitivity ${h.sensitivity}).`, `What happens to margins if ${h.name} stays here for 4 more quarters?`, 'macro');
+    const worst = (mc.stress || []).filter((x) => isNum(x.vsBase) && x.id !== 'easing').sort((x, y) => x.vsBase - y.vsBase)[0];
+    if (worst && worst.vsBase < -0.15) add(worst.vsBase < -0.25 ? 'high' : 'medium', `A ${worst.name.toLowerCase()} would hit the valuation hard.`, `${worst.note} Estimated value ₹${round(worst.value, 0)} (${pct(worst.vsBase, 0)} vs base, ${pct(worst.vsPrice, 0)} vs price).`, `How likely is a ${worst.name.toLowerCase()} within your horizon, and could you hold through it?`, 'macro');
+    if (mc.impact.score >= 6.5) add('medium', 'Results may be flattered by a favourable macro cycle.', `Macro score ${mc.impact.score}/10: ${mc.impact.tailwinds.slice(0, 3).map((x) => x.name).join(', ')} are helping today.`, 'Re-run the valuation with the macro overlay switched off.', 'macro');
+  }
   pts.sort((x, y) => SEV[y.severity] - SEV[x.severity]);
   const top = pts.slice(0, 3);
   const bearThesis = top.length

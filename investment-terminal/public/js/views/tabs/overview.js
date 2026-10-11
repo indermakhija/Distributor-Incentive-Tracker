@@ -36,6 +36,7 @@ export default function overview(el, { app }) {
       ${tile('Downside risk', `${dims.risk.score ?? 'n/a'}/10`, `Bear case ${pct(v?.downsideToBear, 0)} vs price`, 'risk')}
       ${tile('Investor knowledge', a.investor.completed ? `${a.investor.knowledgeScore}/10` : 'Pending', a.investor.completed ? a.investor.convictionType + ' conviction' : html`<a href="#/c/${c.id}/investor">Complete self-assessment →</a>`, 'investor')}
       ${tile('Portfolio fit', isNum(dims.portfolio.score) ? `${dims.portfolio.score}/10` : 'n/a', a.portfolio.fit.available ? `${pct(a.portfolio.fit.positionWeight, 1)} position` : html`<a href="#/portfolio">Add holdings →</a>`, 'portfolio')}
+      ${tile('Macro regime', a.macro.usable ? `${a.macro.impact.score}/10` : 'No data', html`${a.macro.regime} · ${a.macro.impact.sensitivity} sensitivity · <a href="#/c/${c.id}/macro">details →</a>`)}
       ${tile('Evidence confidence', pct(d.confidence, 0), `${a.dataQuality.status} data · ${a.dataQuality.staleCount} stale item(s)`)}
       ${tile('Expected 5y return (base)', pct(v?.scenarios?.base?.expectedReturn5y), `Bear ${pct(v?.scenarios?.bear?.expectedReturn5y)} · Bull ${pct(v?.scenarios?.bull?.expectedReturn5y)}`)}
     </div>

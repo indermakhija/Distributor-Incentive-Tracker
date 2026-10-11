@@ -65,6 +65,16 @@ export function evaluateRules(a) {
     if (isNum(s.maxDrawdown) && isNum(val?.downsideToBear) && -val.downsideToBear > s.maxDrawdown)
       r('drawdown', 'medium', 'Bear case exceeds your drawdown tolerance', `Bear-case fall of ${pct(-val.downsideToBear, 0)} exceeds your stated tolerance of ${pct(s.maxDrawdown, 0)} — size down or wait.`, null, null);
   }
+  const mc = a.macro;
+  if (mc?.usable) {
+    if (mc.impact.score <= 3 && mc.impact.sensitivity !== 'low')
+      r('macro-headwind', 'high', 'Strong macro headwind for a macro-sensitive business', `Macro score ${mc.impact.score}/10 (${mc.impact.sensitivity} sensitivity). Headwinds: ${mc.impact.headwinds.slice(0, 3).map((x) => x.name).join(', ')}. Required margin of safety raised by ${pct(mc.mosUplift, 0)}; buy only at a discount.`, 'BUY_BELOW', null);
+    else if (mc.impact.score < 4 && mc.impact.sensitivity === 'high')
+      r('macro-headwind-mild', 'medium', 'Macro headwind', `Macro score ${mc.impact.score}/10 with high sensitivity — margin of safety raised by ${pct(mc.mosUplift, 0)}.`, null, null);
+    const worst = (mc.stress || []).filter((x) => isNum(x.vsBase) && x.id !== 'easing').sort((x, y) => x.vsBase - y.vsBase)[0];
+    if (worst && worst.vsBase < -0.25) r('macro-stress', 'medium', `Fragile under macro stress (${worst.name})`, `A ${worst.name.toLowerCase()} would cut estimated value by ${pct(-worst.vsBase, 0)} (to ₹${round(worst.value, 0)}). Size the position for this scenario.`, null, null);
+    if (mc.dataset.sample || mc.dataset.stale) r('macro-data', 'medium', 'Macro readings are sample or stale', `${mc.dataset.sample} sample and ${mc.dataset.stale} stale macro readings in use — connect the live feed (Nifty terminal bridge) or update them.`, null, null, 0.03);
+  } else if (mc) r('macro-missing', 'medium', 'No macro data loaded', 'National and international macro factors were not considered. Load the macro dataset or connect the live feed.', null, null, 0.05);
   if (fit?.available && fit.warnings.length) r('portfolio', 'medium', 'Portfolio concentration / liquidity', fit.warnings.join(' '), null, null);
 
   if (dims.risk?.criticalRisk && !(dims.risk.score < 3))

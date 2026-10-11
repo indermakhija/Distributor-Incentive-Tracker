@@ -44,13 +44,22 @@ export function defaultScenarios(company, metrics) {
 }
 
 /** Merges user/analyst scenario overrides onto defaults. */
-export function resolveScenarios(company, metrics) {
+export function resolveScenarios(company, metrics, macro = null) {
   const defs = defaultScenarios(company, metrics);
   const user = company.scenarios || {};
+  const mode = company.macroOverlay || 'auto'; // auto: overlay auto-derived scenarios only; always; off
   const out = {};
   for (const k of SCENARIO_KEYS) {
+    const isUser = !!(user[k] && Object.keys(user[k]).length);
     out[k] = { ...defs[k], ...(user[k] || {}) };
-    out[k].source = user[k] && Object.keys(user[k]).length ? 'user assumption' : 'auto-derived assumption';
+    out[k].source = isUser ? 'user assumption' : 'auto-derived assumption';
+    // Macro overlay: the current national/international regime nudges growth and margins (years 1–5).
+    if (macro && mode !== 'off' && (mode === 'always' || !isUser) && (macro.growth || macro.margin)) {
+      out[k].revenueCagr5 = round(out[k].revenueCagr5 + macro.growth, 4);
+      out[k].ebitdaMarginTarget = round(out[k].ebitdaMarginTarget + macro.margin, 4);
+      out[k].macroAdjustment = { growth: macro.growth, margin: macro.margin };
+      out[k].rationale = `${out[k].rationale || ''} Macro overlay: ${macro.growth >= 0 ? '+' : ''}${(macro.growth * 100).toFixed(1)}pp growth, ${macro.margin >= 0 ? '+' : ''}${(macro.margin * 100).toFixed(1)}pp margin from the current macro regime.`.trim();
+    }
   }
   const tot = SCENARIO_KEYS.reduce((a, k) => a + (out[k].probability || 0), 0) || 1;
   for (const k of SCENARIO_KEYS) out[k].probability = (out[k].probability || 0) / tot;

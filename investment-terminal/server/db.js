@@ -20,6 +20,10 @@ CREATE TABLE IF NOT EXISTS holdings (id INTEGER PRIMARY KEY, user_id INTEGER NOT
 CREATE TABLE IF NOT EXISTS settings (user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, data TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS redteam_reviews (id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, company_id TEXT NOT NULL, responses TEXT, acknowledged_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS audit_log (id INTEGER PRIMARY KEY, user_id INTEGER, action TEXT NOT NULL, entity TEXT, entity_id TEXT, detail TEXT, ip TEXT, created_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS macro_readings (user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, factor_id TEXT NOT NULL, value REAL NOT NULL, previous REAL, neutral REAL, as_of TEXT, source TEXT, type TEXT, updated_at TEXT NOT NULL, PRIMARY KEY(user_id, factor_id));
+CREATE TABLE IF NOT EXISTS macro_history (id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, factor_id TEXT NOT NULL, value REAL NOT NULL, as_of TEXT, source TEXT, type TEXT, recorded_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS bridge_tokens (id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, name TEXT, token_hash TEXT UNIQUE NOT NULL, created_at TEXT NOT NULL, last_used_at TEXT, revoked INTEGER DEFAULT 0);
+CREATE INDEX IF NOT EXISTS idx_macro_hist ON macro_history(user_id, factor_id, as_of);
 CREATE INDEX IF NOT EXISTS idx_analyses ON analyses(user_id, company_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_alerts ON alerts(user_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_audit ON audit_log(user_id, created_at);

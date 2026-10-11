@@ -29,13 +29,15 @@ export async function fetchQuote(ticker, exchange) {
   }
 }
 
-export function integrationStatus(counts = {}) {
+export function integrationStatus(counts = {}, bridge = null) {
   const ai = aiStatus();
   return [
     { id: 'sample', name: 'Illustrative sample dataset', status: 'active', detail: `${counts.sample ?? 0} fictional companies, clearly labelled SAMPLE. Not real securities.` },
     { id: 'manual', name: 'Manual upload (CSV / XLSX / PDF / TXT)', status: 'active', detail: 'Financial statements, annual reports, transcripts, rating reports. Parsed locally on the server.' },
     { id: 'market', name: 'Live market prices', status: process.env.MARKET_DATA_ENDPOINT ? (market.lastCall?.ok === false ? 'error' : 'configured') : 'not_configured',
       detail: process.env.MARKET_DATA_ENDPOINT ? `Licensed endpoint configured. Last call: ${market.lastCall ? `${market.lastCall.ok ? 'OK' : 'FAILED — ' + market.lastCall.error} at ${market.lastCall.at}` : 'none yet'}.` : 'Not configured. Set MARKET_DATA_ENDPOINT to a licensed provider. Prices shown are manually entered or sample, with their dates.' },
+    { id: 'nifty_bridge', name: 'Nifty terminal bridge (live macro & quotes)', status: bridge?.lastUsed ? (Date.now() - Date.parse(bridge.lastUsed) < 2 * 864e5 ? 'live' : 'configured') : bridge?.tokens ? 'configured' : 'not_configured',
+      detail: bridge?.tokens ? `${bridge.tokens} active token(s). Last push/pull: ${bridge.lastUsed || 'never'}. Live macro readings: ${bridge.liveMacro}/${bridge.totalMacro}.` : 'Create a bridge token in Settings and add it to the Nifty terminal backend to stream live macro readings and quotes, and to embed the analyser.' },
     { id: 'filings', name: 'NSE/BSE filings & shareholding', status: 'not_configured', detail: 'Requires an authorised data licence. Restricted sources are not scraped. Upload filings manually or record announcements.' },
     { id: 'news', name: 'News & sentiment feed', status: 'not_configured', detail: 'No licensed news API configured. Earnings-call tone is computed from uploaded transcripts.' },
     { id: 'ai', name: 'AI explanation & red-team layer (Claude)', status: ai.configured ? (ai.last.ok === false ? 'error' : 'configured') : 'not_configured',

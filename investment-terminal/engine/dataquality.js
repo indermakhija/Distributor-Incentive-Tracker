@@ -4,7 +4,7 @@ import { monthsBetween, daysBetween, round, clamp } from './util.js';
 
 export const STALE_LIMITS = { financialsMonths: 15, priceDays: 7, shareholdingMonths: 6, industryMonths: 24 };
 
-export function dataQuality(company, metrics, now = new Date()) {
+export function dataQuality(company, metrics, now = new Date(), macro = null) {
   const issues = [];
   const prov = company.provenance || {};
   const status = company.dataStatus || 'unknown';
@@ -31,7 +31,16 @@ export function dataQuality(company, metrics, now = new Date()) {
   const contradictions = (company.contradictions || []).map((c) => ({ severity: 'medium', text: `Contradiction: ${c}` }));
   issues.push(...contradictions);
 
-  const staleCount = items.filter((i) => i.stale).length;
+  if (macro) {
+    const d = macro.dataset;
+    items.push({ section: 'Macro factors', asOf: null, ageMonths: null, stale: d.available ? d.stale > 0 : null, source: `${d.live} live · ${d.available - d.live - d.sample} manual · ${d.sample} sample of ${d.total}`, type: d.status });
+    if (!d.available) issues.push({ severity: 'medium', text: 'No macro dataset loaded — national/international factors not considered.' });
+    else {
+      if (d.sample) issues.push({ severity: 'medium', text: `${d.sample} macro readings are illustrative sample values — connect the live feed or update them before relying on the macro overlay.` });
+      if (d.stale) issues.push({ severity: 'medium', text: `${d.stale} macro readings are stale.` });
+    }
+  }
+  const staleCount = items.filter((i) => i.stale && i.section !== 'Macro factors').length;
   const unknown = items.filter((i) => i.stale == null).length;
   let confidence = coverage * 0.6 + 0.4;
   confidence -= staleCount * 0.12 + unknown * 0.05;
