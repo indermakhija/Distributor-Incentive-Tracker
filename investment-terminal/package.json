@@ -1,0 +1,26 @@
+{
+  "name": "holistic-investment-terminal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Holistic Company Analysis & Investment Decision Terminal for Indian listed equities",
+  "type": "module",
+  "engines": {
+    "node": ">=22.5"
+  },
+  "scripts": {
+    "start": "node --no-warnings=ExperimentalWarning server/index.js",
+    "dev": "node --no-warnings=ExperimentalWarning --watch server/index.js",
+    "test": "node --no-warnings=ExperimentalWarning --test 'test/*.test.js'",
+    "build:sample": "node scripts/build-sample-data.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
+    "chart.js": "^4.4.1",
+    "exceljs": "^4.4.0",
+    "pdfjs-dist": "^6.4.299",
+    "pdfkit": "^0.20.2"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
+  }
+}
