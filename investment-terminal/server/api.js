@@ -149,6 +149,8 @@ export function buildApi({ db, sampleDir, secureCookies }) {
   r.post('/api/auth/register', async (ctx) => {
     const { email, password, name } = await readJson(ctx.req);
     if (!limiter(`reg:${ctx.ip}`)) throw new HttpError(429, 'Too many attempts. Try again later.');
+    // A single-owner deployment closes sign-up once the first account exists.
+    if (process.env.SIGNUP_MODE === 'first-only' && db.get('SELECT 1 FROM users LIMIT 1')) throw new HttpError(403, 'Sign-up is closed on this terminal.');
     const err = validateCredentials(email, password);
     if (err) throw new HttpError(400, err);
     if (db.get('SELECT 1 FROM users WHERE email = ?', email.toLowerCase())) throw new HttpError(409, 'An account with this email already exists.');

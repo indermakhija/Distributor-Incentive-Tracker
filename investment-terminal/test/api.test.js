@@ -218,12 +218,38 @@ test('bridge: token auth, live macro push re-analyses watchlist, quotes, analysi
   assert.match(body, /Macro — national &amp; international/);
   assert.equal(page.headers.get('x-frame-options'), null);
   assert.match(page.headers.get('content-security-policy'), /frame-ancestors/);
-  const bad = await fetch(base + '/embed/analyser?t=' + url.searchParams.get('t').replace(/.$/, 'x'));
+  const t = url.searchParams.get('t');
+  const dot = t.indexOf('.');
+  const i = dot + 11; // a middle character of the signature carries full data bits
+  const tampered = t.slice(0, i) + (t[i] === 'A' ? 'B' : 'A') + t.slice(i + 1);
+  const bad = await fetch(base + '/embed/analyser?t=' + tampered);
   assert.equal(bad.status, 401, 'tampered embed link rejected');
+  const lastFlip = t.slice(0, -1) + (t.at(-1) === 'A' ? 'B' : 'A');
+  assert.equal((await fetch(base + '/embed/analyser?t=' + lastFlip)).status, 401, 'non-canonical/altered final character rejected');
   // Revoked token loses access.
   const toks = (await c.get('/api/bridge/tokens')).data;
   await c.del(`/api/bridge/tokens/${toks[0].id}`);
   assert.equal((await c.call('GET', '/api/bridge/analysis?ticker=SAMPLE-DPE', undefined, B)).status, 401);
   const integ = (await c.get('/api/integrations')).data;
   assert.ok(integ.some((i) => i.id === 'nifty_bridge'));
+});
+
+test('sign-up lock: SIGNUP_MODE=first-only closes registration after the first account', async () => {
+  const d = mkdtempSync(join(tmpdir(), 'hit-signup-'));
+  const prev = process.env.SIGNUP_MODE;
+  process.env.SIGNUP_MODE = 'first-only';
+  const { server: s2 } = createApp({ dbFile: join(d, 't.db'), log: silent });
+  await new Promise((r) => s2.listen(0, '127.0.0.1', r));
+  const url = `http://127.0.0.1:${s2.address().port}/api/auth/register`;
+  const reg = (email) => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'terminal' }, body: JSON.stringify({ email, password: 'correct-horse-42' }) });
+  try {
+    assert.equal((await reg('owner@test.dev')).status, 201);
+    const second = await reg('intruder@test.dev');
+    assert.equal(second.status, 403);
+    assert.match((await second.json()).error, /closed/);
+  } finally {
+    if (prev === undefined) delete process.env.SIGNUP_MODE; else process.env.SIGNUP_MODE = prev;
+    await new Promise((r) => s2.close(r));
+    rmSync(d, { recursive: true, force: true });
+  }
 });

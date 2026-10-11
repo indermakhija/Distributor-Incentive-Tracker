@@ -65,8 +65,9 @@ export const signEmbed = (userId, cid) => {
 export const verifyEmbed = (t) => {
   const [payload, sig] = String(t || '').split('.');
   if (!payload || !sig) return null;
-  const expect = createHmac('sha256', EMBED_SECRET).update(payload).digest();
-  const got = Buffer.from(sig, 'base64url');
+  // Compare the canonical base64url string, so non-canonical encodings of the same bytes are rejected too.
+  const expect = Buffer.from(createHmac('sha256', EMBED_SECRET).update(payload).digest('base64url'));
+  const got = Buffer.from(sig);
   if (got.length !== expect.length || !timingSafeEqual(got, expect)) return null;
   const p = pj(Buffer.from(payload, 'base64url').toString());
   return p && p.e > Date.now() ? p : null;

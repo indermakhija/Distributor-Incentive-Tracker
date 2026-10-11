@@ -16,7 +16,7 @@ This is decision support, not investment advice. It never claims to predict pric
 cd investment-terminal
 npm install
 npm start            # http://127.0.0.1:3000
-npm test             # 44 unit + integration tests
+npm test             # 45 unit + integration tests
 ```
 
 Requires **Node.js ≥ 22.5** (uses the built-in `node:sqlite`). Create an account in the browser. Each new account gets
@@ -43,6 +43,7 @@ consistent but **synthetic**, and every screen, report and export labels them as
 | `COOKIE_SECURE=1` / `TRUST_PROXY=1` | Use these behind HTTPS or a reverse proxy |
 | `EMBED_ALLOWED_ORIGINS` | Comma-separated sites allowed to iframe the analyser card, e.g. `https://nifty-terminal.fly.dev` |
 | `PUBLIC_URL`, `EMBED_SECRET` | Public base URL used in embed links; the key that signs them (otherwise generated at startup) |
+| `SIGNUP_MODE=first-only` | Single-owner deployment: sign-up closes once the first account exists |
 
 API keys never reach the browser. **Settings → Integrations** shows the real status of every integration. Nothing
 is labelled "live" unless it is.
